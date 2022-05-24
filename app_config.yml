@@ -2,10 +2,11 @@ DASH_APP:
   APP_TITLE: Frequency Analysis in Hydrology
   UPDATE_TITLE: Updating...
   DEBUG: True
+  ALIAS: fiako-anfrek
 
 TEMPLATE:
   WATERMARK_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/watermark.png
-  THEME: BOOTSTRAP
+  THEME: MATERIA
 
 VERSION: v1.0.0
 GITHUB_LINK: https://github.com/fiakoenjiniring/frequency-analysis

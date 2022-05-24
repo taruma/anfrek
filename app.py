@@ -3,6 +3,7 @@ from pyconfig import appConfig
 from pytemplate import fktemplate
 import dash_bootstrap_components as dbc
 import plotly.io as pio
+import pylayout
 
 pio.templates.default = fktemplate
 
@@ -28,13 +29,31 @@ app = dash.Dash(
     ],
 )
 
-server = app.server
+# server = app.server
 
 # LAYOUT APP
 app.layout = dbc.Container(
-    [],
-    fluid=False,
-    class_name="dbc",
+    dbc.Row(
+        [
+            dbc.Col(
+                [
+                    pylayout.HTML_TITLE,
+                    pylayout.HTML_FOOTER,
+                ],
+                md=3,
+                align="center",
+                class_name="pt-3",
+            ),
+            dbc.Col(
+                [
+                    pylayout.HTML_CARDS,
+                ],
+                class_name="pt-3",
+            ),
+        ],
+    ),
+    fluid=True,
+    class_name="dbc my-3 px-3",
 )
 
 if __name__ == "__main__":
