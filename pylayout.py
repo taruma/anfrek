@@ -9,7 +9,9 @@ import pyfigure, pylayoutfunc  # noqa
 
 pio.templates.default = fktemplate
 
-HTML_TITLE = html.Div(
+# LEFT SIDE
+
+HTML_ROW_TITLE = html.Div(
     [
         html.H1(appConfig.DASH_APP.APP_TITLE, className="fw-bold"),
         html.Span(
@@ -17,7 +19,31 @@ HTML_TITLE = html.Div(
             className="text-muted",
         ),
     ],
+    className="my-2",
 )
+
+HTML_ROW_BUTTON_UPLOAD = html.Div(
+    dcc.Upload(
+        dbc.Button(
+            "Drag and Drop or Select File",
+            color="info",
+            id="button-upload",
+            class_name="m-2",
+        ),
+        id="dcc-upload",
+        multiple=False,
+        className="d-grid gap-2",
+    ),
+    className="text-center",
+)
+
+HTML_ROW_BUTTON_EXAMPLE = html.Div(
+    dbc.Button(
+        "Use Example Data", color="secondary", id="button-example", class_name="m-2"
+    )
+)
+
+# FOOTER
 
 HTML_FOOTER = html.Div(
     html.Footer(
@@ -30,52 +56,102 @@ HTML_FOOTER = html.Div(
             ),
             ".",
         ],
-        className="text-muted mt-5",
+        className="text-muted text-center my-3",
     ),
 )
 
+# TAB CONTENT
 
-tab1_table = dbc.Row(
+TAB_DATA = dbc.Row(
     [
+        dbc.Col(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("TABLE", className="fw-bold text-center"),
+                            dcc.Loading(
+                                pylayoutfunc.graph_as_staticplot(
+                                    pyfigure.figure_empty(height=700, margin_all=50)
+                                ),
+                                id="row-table-data",
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            md=4,
+            className="my-2",
+        ),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.H3("TABLE/DATA", className="text-center fw-bold"),
+                        html.H3("VISUALIZATION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=750, margin_all=50)
+                                pyfigure.figure_empty(height=700, margin_all=50)
                             ),
-                            id="row-table-data",
+                            id="row-table-viz",
                         ),
                     ],
                 ),
             ),
             md=8,
-        ),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.H3("Options:", className="fw-bold text-center"),
-                        dbc.Label("Stations:"),
-                        dcc.Loading(
-                            html.P(
-                                "No Available",
-                                className="text-muted text-center",
-                            ),
-                            id="row-table-stations",
-                        ),
-                        html.P("Click here"),
-                    ]
-                ),
-            ),
+            className="my-2",
         ),
     ],
     class_name="mt-3",
 )
 
-tab2_stat = ...
+TAB_STAT = dbc.Row(
+    [
+        html.Div(
+            dbc.Button(
+                "CALCULATE",
+                id="button-calc-stat",
+                color="warning",
+                size="lg",
+            ),
+            className="mx-3",
+        ),
+        dbc.Col(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            dcc.Loading(
+                                pylayoutfunc.graph_as_staticplot(
+                                    pyfigure.figure_empty(height=700, margin_all=50)
+                                ),
+                                id="row-stat-data",
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            md=4,
+            className="my-2",
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        dcc.Loading(
+                            pylayoutfunc.graph_as_staticplot(
+                                pyfigure.figure_empty(height=700, margin_all=50)
+                            ),
+                            id="row-stat-viz",
+                        ),
+                    ],
+                ),
+            ),
+            md=8,
+            className="my-2",
+        ),
+    ],
+    class_name="mt-3",
+)
 
 tab3_freq = ...
 
@@ -84,15 +160,15 @@ tab4_fit = ...
 HTML_CARDS = dbc.Tabs(
     [
         dbc.Tab(
-            tab1_table,
+            TAB_DATA,
             label="TABLE / DATA",
             tab_id="tabid-card-table",
             id="card-table",
             disabled=False,
         ),
         dbc.Tab(
-            "None",
-            label="STAT. & OUTLIER",
+            TAB_STAT,
+            label="STATISTIC & OUTLIER",
             tab_id="tabid-card-stat",
             id="card-stat",
             disabled=True,
@@ -113,4 +189,15 @@ HTML_CARDS = dbc.Tabs(
         ),
     ],
     active_tab="tabid-card-table",
+)
+
+# TEMPORARY
+
+_HTML_TROUBLESHOOTER = html.Div(
+    dbc.Container(
+        [
+            html.Div(id="row-troubleshooter"),
+        ],
+        fluid=True,
+    )
 )
