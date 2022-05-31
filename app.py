@@ -1,6 +1,6 @@
 from pathlib import Path
 import dash
-from dash import Output, Input, State, html, dcc
+from dash import Output, Input, State, dcc
 from pyconfig import appConfig
 from pytemplate import fktemplate
 import dash_bootstrap_components as dbc
@@ -127,11 +127,28 @@ def callback_table_visualize(table_data, table_columns):
 
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
-    print(dataframe.head())
-    print(dataframe.info())
+    fig = pyfigure.figure_tabledata(dataframe)
 
-    return dcc.Graph(figure=pyfigure.figure_scatter(dataframe))
+    return dcc.Graph(figure=fig)
+
+
+@app.callback(
+    Output("row-stat-statistics", "children"),
+    Output("row-stat-distribution", "children"),
+    Input("button-stat-calc", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+)
+def callback_calc_statout(_, table_data, table_columns):
+
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    fig_statout = pyfigure.figure_statout(dataframe)
+
+    fig_dist = pyfigure.figure_distribution(dataframe)
+
+    return dcc.Graph(figure=fig_statout), dcc.Graph(figure=fig_dist)
 
 
 if __name__ == "__main__":
-    app.run_server(debug=DEBUG)
+    app.run(debug=DEBUG)

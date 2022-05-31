@@ -80,7 +80,7 @@ fktemplate.layout.title.font.size = 35
 
 # XAXIS
 _XAXIS_GRIDCOLOR = "black"  # fktemplate.layout.xaxis.gridcolor
-_XAXIS_LINEWIDTH = 2
+_XAXIS_LINEWIDTH = 1
 _XAXIS_TITLE_FONT_SIZE = 20
 _XAXIS_TITLE_STANDOFF = 20
 fktemplate.layout.xaxis.mirror = True
@@ -100,7 +100,7 @@ fktemplate.layout.xaxis.spikedash = "solid"
 
 # YAXIS
 _YAXIS_GRIDCOLOR = "black"  # fktemplate.layout.yaxis.gridcolor
-_YAXIS_LINEWIDTH = 2
+_YAXIS_LINEWIDTH = 1
 _YAXIS_TITLE_FONT_SIZE = 20
 _YAXIS_TITLE_STANDOFF = 15
 fktemplate.layout.yaxis.mirror = True
@@ -118,6 +118,7 @@ fktemplate.layout.yaxis.title.standoff = _YAXIS_TITLE_STANDOFF
 # SUBPLOTS
 # ANNOTATION
 fktemplate.layout.annotationdefaults.font.color = fktemplate.layout.font.color
+fktemplate.layout.annotationdefaults.font.size = 15
 
 # LAYOUT BAR
 fktemplate.layout.barmode = "stack"

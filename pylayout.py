@@ -107,46 +107,50 @@ TAB_DATA = dbc.Row(
 TAB_STAT = dbc.Row(
     [
         html.Div(
-            dbc.Button(
-                "CALCULATE",
-                id="button-calc-stat",
-                color="warning",
-                size="lg",
-            ),
-            className="mx-3",
-        ),
-        dbc.Col(
             [
-                dbc.Card(
-                    dbc.CardBody(
-                        [
-                            dcc.Loading(
-                                pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.figure_empty(height=700, margin_all=50)
-                                ),
-                                id="row-stat-data",
-                            ),
-                        ]
-                    ),
+                dbc.Button(
+                    "CALCULATE",
+                    id="button-stat-calc",
+                    color="warning",
+                    size="lg",
+                    className="me-3",
+                ),
+                dbc.Button(
+                    "DOWNLOAD STATOUT.OUT",
+                    id="button-stat-download",
+                    color="success",
+                    size="lg",
+                    className="me-3",
                 ),
             ],
-            md=4,
+            className="mx-3 mb-3",
+        ),
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H3("STATISTICS & OUTLIER", className="fw-bold text-center"),
+                    dcc.Loading(
+                        pylayoutfunc.graph_as_staticplot(
+                            pyfigure.figure_empty(height=350, margin_all=50)
+                        ),
+                        id="row-stat-statistics",
+                    ),
+                ]
+            ),
             className="my-2",
         ),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        dcc.Loading(
-                            pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=700, margin_all=50)
-                            ),
-                            id="row-stat-viz",
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H3("DISTRIBUTION", className="fw-bold text-center"),
+                    dcc.Loading(
+                        pylayoutfunc.graph_as_staticplot(
+                            pyfigure.figure_empty(height=450, margin_all=50)
                         ),
-                    ],
-                ),
+                        id="row-stat-distribution",
+                    ),
+                ],
             ),
-            md=8,
             className="my-2",
         ),
     ],
@@ -168,7 +172,7 @@ HTML_CARDS = dbc.Tabs(
         ),
         dbc.Tab(
             TAB_STAT,
-            label="STATISTIC & OUTLIER",
+            label="STATISTICS & OUTLIER",
             tab_id="tabid-card-stat",
             id="card-stat",
             disabled=True,
