@@ -105,55 +105,61 @@ TAB_DATA = dbc.Row(
 )
 
 TAB_STAT = dbc.Row(
-    [
-        html.Div(
-            [
-                dbc.Button(
-                    "CALCULATE",
-                    id="button-stat-calc",
-                    color="warning",
-                    size="lg",
-                    className="me-3",
-                ),
-                dbc.Button(
-                    "DOWNLOAD STATOUT.OUT",
-                    id="button-stat-download",
-                    color="success",
-                    size="lg",
-                    className="me-3",
-                ),
-            ],
-            className="mx-3 mb-3",
-        ),
-        dbc.Card(
-            dbc.CardBody(
+    dbc.Col(
+        [
+            html.Div(
                 [
-                    html.H3("STATISTICS & OUTLIER", className="fw-bold text-center"),
-                    dcc.Loading(
-                        pylayoutfunc.graph_as_staticplot(
-                            pyfigure.figure_empty(height=350, margin_all=50)
-                        ),
-                        id="row-stat-statistics",
+                    dbc.Button(
+                        "CALCULATE",
+                        id="button-stat-calc",
+                        color="warning",
+                        size="lg",
+                        className="me-3",
                     ),
-                ]
-            ),
-            className="my-2",
-        ),
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    html.H3("DISTRIBUTION", className="fw-bold text-center"),
-                    dcc.Loading(
-                        pylayoutfunc.graph_as_staticplot(
-                            pyfigure.figure_empty(height=450, margin_all=50)
-                        ),
-                        id="row-stat-distribution",
+                    dbc.Button(
+                        "DOWNLOAD STATOUT.OUT",
+                        id="button-stat-download",
+                        color="success",
+                        size="lg",
+                        className="me-3",
+                        outline=True,
+                        disabled=True,
                     ),
                 ],
+                className="mx-3 mb-3",
             ),
-            className="my-2",
-        ),
-    ],
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.H3(
+                            "STATISTICS & OUTLIER", className="fw-bold text-center"
+                        ),
+                        dcc.Loading(
+                            pylayoutfunc.graph_as_staticplot(
+                                pyfigure.figure_empty(height=350, margin_all=50)
+                            ),
+                            id="row-stat-statistics",
+                        ),
+                    ]
+                ),
+                className="my-4",
+            ),
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.H3("DISTRIBUTION", className="fw-bold text-center"),
+                        dcc.Loading(
+                            pylayoutfunc.graph_as_staticplot(
+                                pyfigure.figure_empty(height=250, margin_all=50)
+                            ),
+                            id="row-stat-distribution",
+                        ),
+                    ],
+                ),
+                className="my-4",
+            ),
+        ],
+    ),
     class_name="mt-3",
 )
 
