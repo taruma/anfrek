@@ -564,6 +564,8 @@ def figure_freq(
     ROWS = 2
     COLS = 1
 
+    dataframe = dataframe.iloc[:, 0].replace(0, np.nan).dropna().to_frame()
+
     fig = make_subplots(
         rows=ROWS,
         cols=COLS,
@@ -648,7 +650,6 @@ def figure_freq(
     UPDATE_YAXES = {
         "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 1,
-        "fixedrange": True,
     }
 
     def update_axis(fig, update, n, axis: str = "x"):
