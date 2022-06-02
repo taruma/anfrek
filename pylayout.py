@@ -125,6 +125,7 @@ TAB_STAT = dbc.Row(
                         outline=True,
                         disabled=True,
                     ),
+                    dcc.Download(id="download-stat"),
                 ],
                 className="mx-3 mb-3",
             ),
@@ -163,7 +164,114 @@ TAB_STAT = dbc.Row(
     class_name="mt-3",
 )
 
-tab3_freq = ...
+TAB_FREQ = dbc.Row(
+    [
+        dbc.Col(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("OPTIONS", className="fw-bold text-center"),
+                            dbc.Label("Return Period", className="fw-bold"),
+                            dbc.Input(
+                                value="2 5 10 25 50 100",
+                                type="text",
+                                id="input-freq-return-period",
+                            ),
+                            dbc.FormText(
+                                "Use Space as Separator", className="text-muted"
+                            ),
+                            html.H4("SOURCE", className="fw-bold text-center mt-3"),
+                            dbc.Label("Normal", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-freq-normal",
+                                options=[
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="SOEWARNO", value="soewarno"),
+                                ],
+                                value="scipy",
+                            ),
+                            dbc.Label("Log Normal", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-freq-lognormal",
+                                options=[
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="SOEWARNO", value="soewarno"),
+                                ],
+                                value="scipy",
+                            ),
+                            dbc.Label("Gumbel", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-freq-gumbel",
+                                options=[
+                                    dict(label="GUMBEL", value="gumbel"),
+                                    dict(label="SOEWARNO", value="soewarno"),
+                                    dict(label="SOETOPO", value="soetopo"),
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="POWELL", value="powell"),
+                                ],
+                                value="gumbel",
+                            ),
+                            dbc.Label("Log Pearson III", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-freq-logpearson3",
+                                options=[
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="SOEWARNO", value="soewarno"),
+                                    dict(label="SOETOPO", value="soetopo"),
+                                    dict(label="LIMANTARA", value="limantara"),
+                                ],
+                                value="scipy",
+                            ),
+                            html.Div(
+                                [
+                                    dbc.Button(
+                                        "CALCULATE",
+                                        id="button-freq-calc",
+                                        color="warning",
+                                        size="md",
+                                        className="me-3",
+                                    ),
+                                    dbc.Button(
+                                        "DOWNLOAD FREQUENCY.CSV",
+                                        id="button-freq-download",
+                                        color="success",
+                                        size="md",
+                                        className="me-3",
+                                        outline=True,
+                                        disabled=True,
+                                    ),
+                                    dcc.Download(id="download-freq"),
+                                ],
+                                className="my-3 text-center",
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            md=4,
+            className="my-2",
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.H3("VISUALIZATION", className="fw-bold text-center"),
+                        dcc.Loading(
+                            pylayoutfunc.graph_as_staticplot(
+                                pyfigure.figure_empty(height=700, margin_all=50)
+                            ),
+                            id="row-freq-viz",
+                        ),
+                    ],
+                ),
+            ),
+            md=8,
+            className="my-2",
+        ),
+    ],
+    class_name="mt-3",
+)
 
 tab4_fit = ...
 
@@ -184,7 +292,7 @@ HTML_CARDS = dbc.Tabs(
             disabled=True,
         ),
         dbc.Tab(
-            "None",
+            TAB_FREQ,
             label="FREQUENCY ANALYSIS",
             tab_id="tabid-card-frequency",
             id="card-frequency",

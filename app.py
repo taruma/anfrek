@@ -135,6 +135,8 @@ def callback_table_visualize(table_data, table_columns):
 @app.callback(
     Output("row-stat-statistics", "children"),
     Output("row-stat-distribution", "children"),
+    Output("button-stat-download", "outline"),
+    Output("button-stat-download", "disabled"),
     Input("button-stat-calc", "n_clicks"),
     State("output-table", "derived_virtual_data"),
     State("output-table", "columns"),
@@ -147,7 +149,57 @@ def callback_calc_statout(_, table_data, table_columns):
 
     fig_dist = pyfigure.figure_distribution(dataframe)
 
-    return dcc.Graph(figure=fig_statout), dcc.Graph(figure=fig_dist)
+    return (
+        dcc.Graph(figure=fig_statout),
+        dcc.Graph(figure=fig_dist, mathjax=True),
+        False,
+        False,
+    )
+
+
+@app.callback(
+    Output("download-stat", "data"),
+    Input("button-stat-download", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+)
+def callback_download_stat(_, table_data, table_columns):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+    text_file = pyfunc.generate_report_statout(dataframe)
+    return {"content": text_file, "filename": "STATOUT.TXT"}
+
+
+@app.callback(
+    Output("row-freq-viz", "children"),
+    Output("button-freq-download", "outline"),
+    Output("button-freq-download", "disabled"),
+    Input("button-freq-calc", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+    State("input-freq-return-period", "value"),
+    State("select-freq-normal", "value"),
+    State("select-freq-lognormal", "value"),
+    State("select-freq-gumbel", "value"),
+    State("select-freq-logpearson3", "value"),
+)
+def callback_calc_freq(
+    _,
+    table_data,
+    table_columns,
+    return_period,
+    src_normal,
+    src_lognormal,
+    src_gumbel,
+    src_logpearson3,
+):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    return_period = pyfunc.transform_return_period(return_period)
+
+    fig = pyfigure.figure_freq(
+        dataframe, return_period, src_normal, src_lognormal, src_gumbel, src_logpearson3
+    )
+    return dcc.Graph(figure=fig), False, False
 
 
 if __name__ == "__main__":

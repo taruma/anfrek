@@ -119,6 +119,8 @@ fktemplate.layout.yaxis.title.standoff = _YAXIS_TITLE_STANDOFF
 # ANNOTATION
 fktemplate.layout.annotationdefaults.font.color = fktemplate.layout.font.color
 fktemplate.layout.annotationdefaults.font.size = 15
+# fktemplate.layout.annotationdefaults.bgcolor = "rgba(255, 255, 255, 0.8)"
+
 
 # LAYOUT BAR
 fktemplate.layout.barmode = "stack"

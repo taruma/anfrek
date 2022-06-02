@@ -1,6 +1,7 @@
 import base64
 import io
 import pandas as pd
+import numpy as np
 from dash import html
 
 
@@ -89,3 +90,60 @@ def transform_to_dataframe(
                 )
 
     return dataframe
+
+
+def generate_report_statout(dataframe: pd.DataFrame) -> str:
+    from hidrokit.contrib.taruma import hk158, hk151
+
+    series = dataframe.iloc[:, 0]
+
+    describe = series.describe()
+    count, mean, std, smin, p25, p50, p75, smax = describe.to_list()
+    Cv, Cs, Ck = hk158.calc_coef(series)
+    std0 = series.std(ddof=0)
+    Kn = hk151.find_Kn(count)
+    mean_log = series.apply(np.log10).mean()
+    std_log = series.apply(np.log10).std()
+    lower_bound, upper_bound = hk151.calc_boundary(
+        series.replace(0, np.nan).dropna().to_frame()
+    )
+
+    report = (
+        "[DESCRIPTIVE]\n"
+        f"COUNT = {count}\n"
+        f"MEAN = {mean}\n"
+        f"STD = {std}\n"
+        f"STD0 = {std0}\n"
+        f"MIN = {smin}\n"
+        f"25P = {p25}\n"
+        f"50P = {p50}\n"
+        f"75P = {p75}\n"
+        f"MAX = {smax}\n\n"
+        "[DISTRIBUTION]\n"
+        f"Cv = {Cv}\n"
+        f"Cs = {Cs}\n"
+        f"Ck = {Ck}\n\n"
+        "[OUTLIER]\n"
+        f"N = {count}\n"
+        f"Kn = {Kn}\n"
+        f"MEAN_LOG = {mean_log}\n"
+        f"STD_LOG = {std_log}\n"
+        f"LOWER_BOUND = {lower_bound}\n"
+        f"UPPER_BOUND = {upper_bound}\n"
+    )
+
+    return report
+
+
+def transform_return_period(return_period):
+    result = []
+    for period in return_period.split():
+        try:
+            num = abs(int(period))
+            if num == 0:
+                continue
+            result.append(num)
+        except Exception as e:
+            print(e)
+
+    return result
