@@ -117,7 +117,7 @@ TAB_STAT = dbc.Row(
                         className="me-3",
                     ),
                     dbc.Button(
-                        "DOWNLOAD STATOUT.OUT",
+                        "DOWNLOAD STATOUT.TXT",
                         id="button-stat-download",
                         color="success",
                         size="lg",
@@ -127,7 +127,7 @@ TAB_STAT = dbc.Row(
                     ),
                     dcc.Download(id="download-stat"),
                 ],
-                className="mx-3 mb-3",
+                className="mx-3 mb-3 text-center",
             ),
             dbc.Card(
                 dbc.CardBody(
@@ -230,14 +230,14 @@ TAB_FREQ = dbc.Row(
                                         id="button-freq-calc",
                                         color="warning",
                                         size="md",
-                                        className="me-3",
+                                        className="me-3 my-2",
                                     ),
                                     dbc.Button(
                                         "DOWNLOAD FREQUENCY.CSV",
                                         id="button-freq-download",
                                         color="success",
                                         size="md",
-                                        className="me-3",
+                                        className="me-3 my-2",
                                         outline=True,
                                         disabled=True,
                                     ),
@@ -249,7 +249,7 @@ TAB_FREQ = dbc.Row(
                     ),
                 ),
             ],
-            md=4,
+            md=3,
             className="my-2",
         ),
         dbc.Col(
@@ -266,14 +266,123 @@ TAB_FREQ = dbc.Row(
                     ],
                 ),
             ),
-            md=8,
+            md=9,
             className="my-2",
         ),
     ],
     class_name="mt-3",
 )
 
-tab4_fit = ...
+TAB_FIT = dbc.Row(
+    [
+        dbc.Col(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("OPTIONS", className="fw-bold text-center"),
+                            dcc.Markdown(
+                                r"The Significance Level ($\alpha$)",
+                                mathjax=True,
+                                className="fw-bold",
+                            ),
+                            dbc.Input(
+                                value="0.05",
+                                type="number",
+                                id="input-fit-alpha",
+                                min=0,
+                                max=1,
+                                step=0.01,
+                            ),
+                            dbc.FormText(
+                                "Input as Decimal, 0.05 for 5%", className="text-muted"
+                            ),
+                            html.H4("SOURCE", className="fw-bold text-center mt-3"),
+                            dbc.Label("Kolmogorov-Smirnov", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-fit-ks",
+                                options=[
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="SOEWARNO", value="soewarno"),
+                                    dict(label="SOETOPO", value="soetopo"),
+                                ],
+                                value="scipy",
+                            ),
+                            dbc.Label("Chi-Square", className="fw-bold mt-2"),
+                            dbc.Select(
+                                id="select-fit-chisquare",
+                                options=[
+                                    dict(label="SCIPY", value="scipy"),
+                                    dict(label="LIMANTARA", value="limantara"),
+                                ],
+                                value="scipy",
+                            ),
+                            html.Div(
+                                [
+                                    dbc.Button(
+                                        "CALCULATE",
+                                        id="button-fit-calc",
+                                        color="warning",
+                                        size="md",
+                                        className="me-3 my-2",
+                                    ),
+                                    dbc.Button(
+                                        "DOWNLOAD GOODNESSOFFIT.CSV",
+                                        id="button-fit-download",
+                                        color="success",
+                                        size="md",
+                                        className="me-3 my-2",
+                                        outline=True,
+                                        disabled=True,
+                                    ),
+                                    dcc.Download(id="download-fit"),
+                                ],
+                                className="my-3 text-center",
+                            ),
+                        ]
+                    ),
+                ),
+            ],
+            md=3,
+            className="my-2",
+        ),
+        dbc.Col(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("VISUALIZATION", className="fw-bold text-center"),
+                            dcc.Loading(
+                                pylayoutfunc.graph_as_staticplot(
+                                    pyfigure.figure_empty(height=450, margin_all=50)
+                                ),
+                                id="row-fit-viz",
+                            ),
+                        ]
+                    ),
+                    className="mb-4",
+                ),
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H3("RESULTS", className="fw-bold text-center"),
+                            dcc.Loading(
+                                pylayoutfunc.graph_as_staticplot(
+                                    pyfigure.figure_empty(height=450, margin_all=50)
+                                ),
+                                id="row-fit-result",
+                            ),
+                        ],
+                    ),
+                    className="my-4",
+                ),
+            ],
+            md=9,
+            className="my-2",
+        ),
+    ],
+    class_name="mt-3",
+)
 
 HTML_CARDS = dbc.Tabs(
     [
@@ -299,7 +408,7 @@ HTML_CARDS = dbc.Tabs(
             disabled=True,
         ),
         dbc.Tab(
-            "None",
+            TAB_FIT,
             label="GOODNESS OF FIT",
             tab_id="tabid-card-goodness",
             id="card-goodness",

@@ -234,5 +234,55 @@ def callback_down_freq(
     return dcc.send_data_frame(result.to_csv, "FREQUENCY.CSV")
 
 
+@app.callback(
+    Output("row-fit-viz", "children"),
+    Output("row-fit-result", "children"),
+    Output("button-fit-download", "outline"),
+    Output("button-fit-download", "disabled"),
+    Input("button-fit-calc", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+    State("input-fit-alpha", "value"),
+    State("select-fit-ks", "value"),
+    State("select-fit-chisquare", "value"),
+    State("select-freq-normal", "value"),
+    State("select-freq-lognormal", "value"),
+    State("select-freq-gumbel", "value"),
+    State("select-freq-logpearson3", "value"),
+)
+def callback_calc_fit(
+    _,
+    table_data,
+    table_columns,
+    alpha,
+    src_ks,
+    src_chisquare,
+    src_normal,
+    src_lognormal,
+    src_gumbel,
+    src_logpearson3,
+):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    alpha = float(alpha)
+
+    fig_viz = pyfigure.figure_fit_viz(
+        dataframe,
+        alpha,
+        src_ks,
+        src_chisquare,
+        src_normal,
+        src_lognormal,
+        src_gumbel,
+        src_logpearson3,
+    )
+    return (
+        dcc.Graph(figure=fig_viz, mathjax=True),
+        dcc.Graph(figure=fig_viz),
+        False,
+        False,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=DEBUG)

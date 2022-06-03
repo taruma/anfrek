@@ -671,3 +671,271 @@ def figure_freq(
         data.marker.color = color
 
     return fig
+
+
+def figure_fit_viz(
+    dataframe: pd.DataFrame,
+    alpha: float,
+    src_ks: str,
+    src_chisquare: str,
+    src_normal: str,
+    src_lognormal: str,
+    src_gumbel: str,
+    src_logpearson3: str,
+) -> go.Figure:
+    from hidrokit.contrib.taruma import hk140, hk141
+
+    dataframe = dataframe.iloc[:, 0].replace(0, np.nan).dropna().to_frame()
+
+    ROWS = 2
+    COLS = 5
+
+    pad_vertical = 0.2 / COLS / 2
+
+    fig = make_subplots(
+        rows=ROWS,
+        cols=COLS,
+        specs=[
+            [
+                {"rowspan": 2, "r": pad_vertical},
+                {},
+                {},
+                {},
+                {},
+            ],
+            [
+                None,
+                {},
+                {},
+                {},
+                {},
+            ],
+        ],
+        shared_yaxes=True,
+        vertical_spacing=0.15,
+        horizontal_spacing=0.2 / COLS / 2,
+    )
+
+    fig.layout.images = [generate_watermark(n) for n in range(2, (ROWS * COLS))]
+
+    # RANK (1,1)
+
+    series = dataframe.iloc[:, 0]
+    bar_x = series.sort_values(ascending=False)
+    bar_y = [f"$R_{{{rank}}}$" for rank in range(1, series.size + 1)][::-1]
+
+    bar_rank = go.Bar(
+        x=bar_x,
+        y=bar_y,
+        orientation="h",
+        showlegend=False,
+        hovertemplate="<b>%{customdata}</b>: <i>%{x}</i><extra></extra>",
+        customdata=np.arange(1, series.size + 1)[::-1],
+    )
+
+    fig.add_trace(bar_rank, row=1, col=1)
+
+    # KOLMOGOROV-SMIRNOV (CDF)
+
+    ks_normal = hk140.kstest(
+        dataframe,
+        dist="normal",
+        source_dist=src_normal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_lognormal = hk140.kstest(
+        dataframe,
+        dist="lognormal",
+        source_dist=src_lognormal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_gumbel = hk140.kstest(
+        dataframe,
+        dist="gumbel",
+        source_dist=src_gumbel,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_logpearson3 = hk140.kstest(
+        dataframe,
+        dist="logpearson3",
+        source_dist=src_logpearson3,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+
+    def ks_cdf(ksdf: pd.DataFrame, dist: str) -> go.Scatter:
+
+        x = ksdf.x
+        p_w = ksdf.p_w
+        p_d = ksdf.p_d
+
+        return [
+            go.Scatter(
+                x=x,
+                y=p_w,
+                mode="markers+lines",
+                showlegend=False,
+                name="Prob Weibull",
+                line_shape="spline",
+                line_color=pytemplate.fktemplate.layout.colorway[0],
+                marker_size=8,
+                marker_line_width=2,
+                marker_line_color=pytemplate.fktemplate.layout.colorway[0],
+                marker_symbol="x-thin",
+                marker_opacity=0.3,
+                hovertemplate="val=%{x}<br>prob=%{y}",
+            ),
+            go.Scatter(
+                x=x,
+                y=p_d,
+                mode="markers+lines",
+                showlegend=False,
+                name=f"Prob {dist}",
+                line_shape="spline",
+                line_color=pytemplate.fktemplate.layout.colorway[1],
+                marker_size=8,
+                marker_line_width=2,
+                marker_line_color=pytemplate.fktemplate.layout.colorway[1],
+                marker_symbol="x-thin",
+                marker_opacity=0.3,
+                hovertemplate="val=%{x}<br>prob=%{y}",
+            ),
+        ]
+
+    # NORMAL
+
+    cdf_normal = ks_cdf(ks_normal, "Normal")
+    [fig.add_trace(_graph, row=1, col=2) for _graph in cdf_normal]
+
+    # LOGNORMAL
+    cdf_lognormal = ks_cdf(ks_lognormal, "Log Normal")
+    [fig.add_trace(_graph, row=1, col=3) for _graph in cdf_lognormal]
+
+    # GUMBEL
+    cdf_gumbel = ks_cdf(ks_gumbel, "Gumbel")
+    [fig.add_trace(_graph, row=1, col=4) for _graph in cdf_gumbel]
+
+    # LOGPEARSON3
+    cdf_logpearson3 = ks_cdf(ks_logpearson3, "Log Pearson III")
+    [fig.add_trace(_graph, row=1, col=5) for _graph in cdf_logpearson3]
+
+    # CHI-SQUARE (CLASS)
+
+    # ADD STRIP
+
+    strip = go.Box(
+        y=series,
+        showlegend=False,
+        # alignmentgroup=True,
+        boxpoints="all",
+        hoverinfo="skip",
+        line_color="rgba(255,255,255,0)",
+        fillcolor="rgba(255,255,255,0)",
+        marker_color=pytemplate.fktemplate.layout.colorway[0],
+        pointpos=0,
+        jitter=0.3,
+    )
+
+    [fig.add_trace(strip, row=2, col=_col) for _col in range(2, 6)]
+
+    # CLASS SEPARATION
+
+    n_class = hk141._calc_k(series.size)
+
+    # TODO: CREATE FUNCTION WITH RETURN CLASS SEPARATION [-inf, c1, c2, c3, +inf]
+
+    # fig.add_trace(strip, row=2, col=2)
+    # fig.add_trace(_empty, row=2, col=3)
+    # fig.add_trace(_empty, row=2, col=4)
+    # fig.add_trace(_empty, row=2, col=5)
+
+    fig.add_annotation(
+        text=f"$\\text{{Rank}}(n={{{series.size}}})$",
+        showarrow=False,
+        x=0,
+        xref="x domain",
+        xanchor="left",
+        y=1,
+        yref="y domain",
+        yanchor="bottom",
+        yshift=2,
+    )
+
+    fig.add_annotation(
+        text=r"$\text{Kolmogorov-Smirnov (CDF)}$",
+        showarrow=False,
+        x=0,
+        xref="x2 domain",
+        xanchor="left",
+        y=1,
+        yref="y2 domain",
+        yanchor="bottom",
+        yshift=2,
+    )
+
+    fig.add_annotation(
+        text=r"$\text{Chi-Square }X^2\text{ (Class)}$",
+        showarrow=False,
+        x=0,
+        xref="x6 domain",
+        xanchor="left",
+        y=1,
+        yref="y6 domain",
+        yanchor="bottom",
+        yshift=2,
+    )
+
+    fig.update_layout(
+        hovermode="closest",
+        dragmode="zoom",
+        margin=dict(t=30),
+    )
+
+    DIST = "Normal,Log Normal,Gumbel,Log Pearson III".split(",")
+
+    UPDATE_YAXIS_KS = {"range": [0, 1]}
+    UPDATE_XAXIS_KS = {"showticklabels": False}
+
+    for n, dist in zip(range(2, 6), DIST):
+        fig.update(layout={f"yaxis{n}": UPDATE_YAXIS_KS})
+        fig.update(layout={f"xaxis{n}": UPDATE_XAXIS_KS})
+        fig.add_annotation(
+            text=f"$\\text{{{dist}}}$",
+            showarrow=False,
+            x=0.5,
+            xref=f"x{n} domain",
+            xanchor="center",
+            y=0,
+            yref=f"y{n} domain",
+            yanchor="top",
+            yshift=-4,
+        )
+
+    UPDATE_YAXIS_CHI = {"range": [min(series), max(series)]}
+    UPDATE_XAXIS_CHI = {"showticklabels": False}
+
+    for n, dist in zip(range(6, 10), DIST):
+        fig.update(layout={f"yaxis{n}": UPDATE_YAXIS_CHI})
+        fig.update(layout={f"xaxis{n}": UPDATE_XAXIS_CHI})
+        fig.add_annotation(
+            text=f"$\\text{{{dist}}}$",
+            showarrow=False,
+            x=0.5,
+            xref=f"x{n} domain",
+            xanchor="center",
+            y=0,
+            yref=f"y{n} domain",
+            yanchor="top",
+            yshift=-4,
+        )
+
+    # fig.update_layout(yaxis2_range=[0, 1], yaxis3_range=[0, 1])
+
+    return fig
