@@ -558,7 +558,7 @@ def figure_freq(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> go.Figure:
-    from hidrokit.contrib.taruma import anfrek
+    from hktaruma import anfrek
     from itertools import cycle, islice
 
     ROWS = 2
@@ -683,9 +683,11 @@ def figure_fit_viz(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> go.Figure:
-    from hidrokit.contrib.taruma import hk140, hk141
+    from hktaruma import hk140, hk141
+    from hktaruma import anfrek
 
-    dataframe = dataframe.iloc[:, 0].replace(0, np.nan).dropna().to_frame()
+    series = dataframe.iloc[:, 0].replace(0, np.nan).dropna()
+    dataframe = series.to_frame()
 
     ROWS = 2
     COLS = 5
@@ -696,20 +698,8 @@ def figure_fit_viz(
         rows=ROWS,
         cols=COLS,
         specs=[
-            [
-                {"rowspan": 2, "r": pad_vertical},
-                {},
-                {},
-                {},
-                {},
-            ],
-            [
-                None,
-                {},
-                {},
-                {},
-                {},
-            ],
+            [{"rowspan": 2, "r": pad_vertical}, {}, {}, {}, {}],
+            [None, {}, {}, {}, {}],
         ],
         shared_yaxes=True,
         vertical_spacing=0.15,
@@ -720,7 +710,6 @@ def figure_fit_viz(
 
     # RANK (1,1)
 
-    series = dataframe.iloc[:, 0]
     bar_x = series.sort_values(ascending=False)
     bar_y = [f"$R_{{{rank}}}$" for rank in range(1, series.size + 1)][::-1]
 
@@ -734,6 +723,23 @@ def figure_fit_viz(
     )
 
     fig.add_trace(bar_rank, row=1, col=1)
+
+    fig.update_layout(
+        yaxis={
+            "spikethickness": 1,
+            "showspikes": True,
+            "spikemode": "across",
+            "spikedash": "solid",
+            "spikesnap": "cursor",
+        },
+        xaxis={
+            "spikethickness": 1,
+            "showspikes": True,
+            "spikemode": "across",
+            "spikedash": "solid",
+            "spikesnap": "cursor",
+        },
+    )
 
     # KOLMOGOROV-SMIRNOV (CDF)
 
@@ -770,7 +776,7 @@ def figure_fit_viz(
         show_stat=False,
     )
 
-    def ks_cdf(ksdf: pd.DataFrame, dist: str) -> go.Scatter:
+    def ks_cdf(ksdf: pd.DataFrame, dist: str) -> list[go.Scatter]:
 
         x = ksdf.x
         p_w = ksdf.p_w
@@ -790,7 +796,7 @@ def figure_fit_viz(
                 marker_line_color=pytemplate.fktemplate.layout.colorway[0],
                 marker_symbol="x-thin",
                 marker_opacity=0.3,
-                hovertemplate="val=%{x}<br>prob=%{y}",
+                hovertemplate="val=%{x}<br>prob=%{y:.2f}",
             ),
             go.Scatter(
                 x=x,
@@ -805,7 +811,7 @@ def figure_fit_viz(
                 marker_line_color=pytemplate.fktemplate.layout.colorway[1],
                 marker_symbol="x-thin",
                 marker_opacity=0.3,
-                hovertemplate="val=%{x}<br>prob=%{y}",
+                hovertemplate="val=%{x}<br>prob=%{y:.2f}",
             ),
         ]
 
@@ -839,6 +845,7 @@ def figure_fit_viz(
         line_color="rgba(255,255,255,0)",
         fillcolor="rgba(255,255,255,0)",
         marker_color=pytemplate.fktemplate.layout.colorway[0],
+        marker_symbol="diamond-wide",
         pointpos=0,
         jitter=0.3,
     )
@@ -849,12 +856,83 @@ def figure_fit_viz(
 
     n_class = hk141._calc_k(series.size)
 
-    # TODO: CREATE FUNCTION WITH RETURN CLASS SEPARATION [-inf, c1, c2, c3, +inf]
+    # NORMAL
 
-    # fig.add_trace(strip, row=2, col=2)
-    # fig.add_trace(_empty, row=2, col=3)
-    # fig.add_trace(_empty, row=2, col=4)
-    # fig.add_trace(_empty, row=2, col=5)
+    def create_class_sep(n_class, func_freq, series, func_source):
+        # SOURCE: hidrokit.contrib.taruma.hk141 (v0.4.0)
+        prob_list = np.linspace(0, 1, n_class + 1)[::-1]
+        prob_seq = prob_list[1:-1]
+
+        T = 1 / prob_seq
+        val_x = (
+            func_freq(series.to_frame(), return_period=T, source=func_source)
+            .to_numpy()
+            .flatten()
+        )
+
+        # Chi Square Table
+        seq_x = np.concatenate([[series.min()], val_x, [series.max()]])
+        return seq_x
+
+    def shape_class_sep(seperator: np.ndarray, n: int, series: pd.Series):
+        # COLOR
+        from itertools import cycle, islice
+
+        colorway = pytemplate.fktemplate.layout.colorway
+        color = list(islice(cycle(colorway), seperator.size))
+
+        counter = []
+        for i, fillcolor in zip(range(1, seperator.size), color):
+            fig.add_shape(
+                type="rect",
+                x0=0,
+                y0=seperator[i - 1],
+                x1=1,
+                y1=seperator[i],
+                xref=f"x{n} domain",
+                yref=f"y{n}",
+                fillcolor=fillcolor,
+                opacity=0.2,
+                line_width=1,
+            )
+            left = -np.inf if i == 1 else seperator[i - 1]
+            right = np.inf if i == seperator.size - 1 else seperator[i]
+            counter.append(series.between(left, right, inclusive="right").sum())
+
+        # print(counter)
+
+        counter_text = "<br>".join(
+            [f"C{group}:{count}" for group, count in enumerate(counter, 1)][::-1]
+        )
+        fig.add_annotation(
+            text="Classes",
+            showarrow=False,
+            x=0.02,
+            xref=f"x{n} domain",
+            xanchor="left",
+            y=0.5,
+            yref=f"y{n} domain",
+            yanchor="middle",
+            yshift=2,
+            align="center",
+            bordercolor=pytemplate.fktemplate.layout.font.color,
+            bgcolor=pytemplate.fktemplate.layout.paper_bgcolor,
+            borderwidth=1,
+            hovertext=counter_text,
+        )
+
+    sep_normal = create_class_sep(n_class, anfrek.freq_normal, series, src_normal)
+    shape_class_sep(sep_normal, 6, series)
+    sep_lognormal = create_class_sep(
+        n_class, anfrek.freq_lognormal, series, src_lognormal
+    )
+    shape_class_sep(sep_lognormal, 7, series)
+    sep_gumbel = create_class_sep(n_class, anfrek.freq_gumbel, series, src_gumbel)
+    shape_class_sep(sep_gumbel, 8, series)
+    sep_logpearson3 = create_class_sep(
+        n_class, anfrek.freq_logpearson3, series, src_logpearson3
+    )
+    shape_class_sep(sep_logpearson3, 9, series)
 
     fig.add_annotation(
         text=f"$\\text{{Rank}}(n={{{series.size}}})$",
@@ -881,7 +959,7 @@ def figure_fit_viz(
     )
 
     fig.add_annotation(
-        text=r"$\text{Chi-Square }X^2\text{ (Class)}$",
+        text=f"$\\text{{Chi-Square ({n_class} Classes)}}$",
         showarrow=False,
         x=0,
         xref="x6 domain",
@@ -900,8 +978,20 @@ def figure_fit_viz(
 
     DIST = "Normal,Log Normal,Gumbel,Log Pearson III".split(",")
 
-    UPDATE_YAXIS_KS = {"range": [0, 1]}
-    UPDATE_XAXIS_KS = {"showticklabels": False}
+    UPDATE_YAXIS_KS = {
+        "range": [0, 1],
+        "spikethickness": 1,
+        "showspikes": True,
+        "spikemode": "across",
+        "spikedash": "solid",
+    }
+    UPDATE_XAXIS_KS = {
+        "showticklabels": False,
+        "spikethickness": 1,
+        "showspikes": True,
+        "spikemode": "across",
+        "spikedash": "solid",
+    }
 
     for n, dist in zip(range(2, 6), DIST):
         fig.update(layout={f"yaxis{n}": UPDATE_YAXIS_KS})
@@ -919,7 +1009,7 @@ def figure_fit_viz(
         )
 
     UPDATE_YAXIS_CHI = {"range": [min(series), max(series)]}
-    UPDATE_XAXIS_CHI = {"showticklabels": False}
+    UPDATE_XAXIS_CHI = {"showticklabels": False, "fixedrange": True}
 
     for n, dist in zip(range(6, 10), DIST):
         fig.update(layout={f"yaxis{n}": UPDATE_YAXIS_CHI})
@@ -936,6 +1026,404 @@ def figure_fit_viz(
             yshift=-4,
         )
 
-    # fig.update_layout(yaxis2_range=[0, 1], yaxis3_range=[0, 1])
+    return fig
+
+
+def figure_fit_result(
+    dataframe: pd.DataFrame,
+    alpha: float,
+    src_ks: str,
+    src_chisquare: str,
+    src_normal: str,
+    src_lognormal: str,
+    src_gumbel: str,
+    src_logpearson3: str,
+) -> go.Figure:
+    from hktaruma import hk140, hk141
+
+    series = dataframe.iloc[:, 0].replace(0, np.nan).dropna()
+    dataframe = series.to_frame()
+
+    ROWS = 2
+    COLS = 5
+
+    fig = make_subplots(
+        rows=ROWS,
+        cols=COLS,
+        shared_yaxes=True,
+        specs=[
+            [{}, {}, {}, {}, {}],
+            [
+                {},
+                {"secondary_y": True},
+                {"secondary_y": True},
+                {"secondary_y": True},
+                {"secondary_y": True},
+            ],
+        ],
+        vertical_spacing=0.17,
+        horizontal_spacing=0.2 / COLS,
+    )
+
+    fig.layout.images = [generate_watermark(n) for n in range(2, (ROWS * COLS))]
+
+    # KSTEST
+
+    # CRITICAL
+
+    dcr = hk140.calc_dcr(alpha, series.size, source=src_ks)
+
+    bar_dcr = go.Bar(
+        x=["Delta Critical"],
+        y=[dcr],
+        showlegend=False,
+        name="Delta Critical",
+        width=[0.5],
+        text=[dcr],
+        texttemplate="<b>%{text:.5f}</b>",
+        textposition="auto",
+        hoverinfo="skip",
+    )
+
+    fig.add_trace(bar_dcr, row=1, col=1)
+
+    # DELTA DISTRIB
+
+    ks_normal = hk140.kstest(
+        dataframe,
+        dist="normal",
+        source_dist=src_normal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_lognormal = hk140.kstest(
+        dataframe,
+        dist="lognormal",
+        source_dist=src_lognormal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_gumbel = hk140.kstest(
+        dataframe,
+        dist="gumbel",
+        source_dist=src_gumbel,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+    ks_logpearson3 = hk140.kstest(
+        dataframe,
+        dist="logpearson3",
+        source_dist=src_logpearson3,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+    )
+
+    # PLOT
+
+    def delta_ks(ksdf: pd.DataFrame):
+
+        d = ksdf.d
+        no = ksdf.no
+        base_color = pytemplate.fktemplate.layout.colorway[0]
+        next_color = pytemplate.fktemplate.layout.colorway[1]
+
+        d_max = d.max()
+        mask = d == d_max
+        marker_size = mask.replace(False, 8).replace(True, 12)
+        marker_symbol = mask.replace(False, "x-thin").replace(True, "x-dot")
+        marker_opacity = mask.replace(False, 0.3).replace(True, 0.8)
+        marker_opacity_bar = mask.replace(False, 0.2).replace(True, 0.5)
+        marker_line_color = mask.replace(False, base_color).replace(True, next_color)
+
+        return [
+            go.Bar(
+                x=no,
+                y=d,
+                showlegend=False,
+                marker_line_width=0,
+                marker_color=marker_line_color,
+                marker_opacity=marker_opacity_bar,
+                hoverinfo="skip",
+            ),
+            go.Scatter(
+                x=no,
+                y=d,
+                mode="markers+lines",
+                showlegend=False,
+                line_shape="spline",
+                line_color=base_color,
+                marker_size=marker_size,
+                marker_line_width=2,
+                marker_line_color=marker_line_color,
+                marker_symbol=marker_symbol,
+                marker_opacity=marker_opacity,
+                hovertemplate="R<sub>%{x}</sub><sup>d</sup>: <b>%{y:.2f}</b><extra></extra>",
+            ),
+        ]
+
+    # NORMAL
+
+    delta_normal = delta_ks(ks_normal)
+    [fig.add_trace(_graph, row=1, col=2) for _graph in delta_normal]
+    delta_lognormal = delta_ks(ks_lognormal)
+    [fig.add_trace(_graph, row=1, col=3) for _graph in delta_lognormal]
+    delta_gumbel = delta_ks(ks_gumbel)
+    [fig.add_trace(_graph, row=1, col=4) for _graph in delta_gumbel]
+    delta_logpearson3 = delta_ks(ks_logpearson3)
+    [fig.add_trace(_graph, row=1, col=5) for _graph in delta_logpearson3]
+
+    # CHI SQUARE
+
+    # ADD CRITICAL
+
+    n_class = hk141._calc_k(series.size)
+    xcr = hk141.calc_xcr(alpha, dk=hk141._calc_dk(n_class, 2), source=src_chisquare)
+
+    bar_xcr = go.Bar(
+        x=["X Critical"],
+        y=[xcr],
+        showlegend=False,
+        name="X Critical",
+        width=[0.5],
+        text=[xcr],
+        texttemplate="<b>%{text:.5f}</b>",
+        textposition="auto",
+        hoverinfo="skip",
+        marker_color=pytemplate.fktemplate.layout.colorway[2],
+    )
+
+    fig.add_trace(bar_xcr, row=2, col=1)
+
+    # X DISTRIB
+
+    chi_normal = hk141.chisquare(
+        dataframe,
+        dist="normal",
+        source_dist=src_normal,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    )
+    chi_lognormal = hk141.chisquare(
+        dataframe,
+        dist="lognormal",
+        source_dist=src_lognormal,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    )
+    chi_gumbel = hk141.chisquare(
+        dataframe,
+        dist="gumbel",
+        source_dist=src_gumbel,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    )
+    chi_logpearson3 = hk141.chisquare(
+        dataframe,
+        dist="logpearson3",
+        source_dist=src_logpearson3,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    )
+
+    # PLOT
+
+    def x_chisquare(chidf: pd.DataFrame, dist: str):
+        from itertools import cycle, islice
+
+        fe = chidf.fe
+        ft = chidf.ft
+        x_calc = np.sum(np.power(2, (fe - ft)) / ft)
+
+        no = chidf.index
+
+        colorway_list = pytemplate.fktemplate.layout.colorway
+        colors = list(islice(cycle(colorway_list), fe.size))
+
+        return [
+            go.Scatter(
+                x=[np.mean(no)],
+                y=[x_calc],
+                showlegend=False,
+                mode="markers",
+                marker_size=12,
+                marker_symbol="x-dot",
+                marker_opacity=0.8,
+                marker_color=pytemplate.fktemplate.layout.colorway[2],
+                marker_line_width=2,
+                marker_line_color=pytemplate.fktemplate.layout.font.color,
+                hovertemplate="X<sup>2</sup>: <b>%{y:.2f}</b><extra></extra>",
+            ),
+            go.Bar(
+                x=no,
+                y=fe,
+                marker_line_width=2,
+                marker_line_color=pytemplate._FONT_COLOR_RGB_ALPHA.replace(
+                    "0.2", "0.8"
+                ),
+                marker_color=colors,
+                marker_opacity=0.1,
+                hoverinfo="skip",
+                showlegend=False,
+                text=fe.to_list(),
+                texttemplate="<b>%{text:d}</b>",
+                textposition="auto",
+                textfont_color=pytemplate._FONT_COLOR_RGB_ALPHA,
+            ),
+            go.Scatter(
+                x=no,
+                y=fe,
+                mode="lines",
+                line_shape="spline",
+                line_color=colorway_list[2],
+                opacity=0.2,
+                hoverinfo="skip",
+                showlegend=False,
+            ),
+        ]
+
+    SECONDARY = (False, True, True)
+
+    x2_normal = x_chisquare(chi_normal, "Normal")
+    [
+        fig.add_trace(_graph, row=2, col=2, secondary_y=sec_y)
+        for _graph, sec_y in zip(x2_normal, SECONDARY)
+    ]
+
+    x2_lognormal = x_chisquare(chi_lognormal, "Log Normal")
+    [
+        fig.add_trace(_graph, row=2, col=3, secondary_y=sec_y)
+        for _graph, sec_y in zip(x2_lognormal, SECONDARY)
+    ]
+
+    x2_gumbel = x_chisquare(chi_gumbel, "Gumbel")
+    [
+        fig.add_trace(_graph, row=2, col=4, secondary_y=sec_y)
+        for _graph, sec_y in zip(x2_gumbel, SECONDARY)
+    ]
+
+    x2_logpearson3 = x_chisquare(chi_logpearson3, "Log Pearson III")
+    [
+        fig.add_trace(_graph, row=2, col=5, secondary_y=sec_y)
+        for _graph, sec_y in zip(x2_logpearson3, SECONDARY)
+    ]
+
+    # [fig.add_trace({"x": [], "y": []}, row=2, col=_col) for _col in range(3, COLS + 1)]
+
+    # ADD LINE
+
+    [
+        fig.add_hline(
+            dcr, line_width=1, line_dash="dashdot", row=1, col=n, layer="below"
+        )
+        for n in range(1, 6)
+    ]
+
+    [
+        fig.add_hline(
+            xcr, line_width=1, line_dash="dashdot", row=2, col=n, layer="below"
+        )
+        for n in range(1, 6)
+    ]
+
+    # UPDATE LAYOUT (ANNOTATION)
+
+    UPDATE_XAXIS_KS = {
+        "showticklabels": False,
+        "fixedrange": False,
+    }
+
+    DIST_KS = [
+        r"$\Delta_{\text{Critical}}$",
+        r"$\Delta_{\text{Normal}}$",
+        r"$\Delta_{\text{Log Normal}}$",
+        r"$\Delta_{\text{Gumbel}}$",
+        r"$\Delta_{\text{Log Pearson III}}$",
+    ]
+
+    for n, dist in zip(range(1, 6), DIST_KS):
+        fig.update(layout={f"xaxis{n}": UPDATE_XAXIS_KS})
+        fig.add_annotation(
+            text=dist,
+            showarrow=False,
+            x=0.5,
+            xref=f"x{n} domain" if n != 1 else "x domain",
+            xanchor="center",
+            y=0,
+            yref=f"y{n} domain" if n != 1 else "y domain",
+            yanchor="top",
+            yshift=-4,
+        )
+
+    fig.add_annotation(
+        text=r"$\text{Kolmogorov-Smirnov }(\Delta_{\text{Critical}} \le \Delta_{\text{Distribution}})$",
+        showarrow=False,
+        x=0.5,
+        xref="x3 domain",
+        xanchor="center",
+        y=1,
+        yref="y3 domain",
+        yanchor="bottom",
+        yshift=4,
+    )
+
+    DIST_CHI = [
+        r"$X^2_{\text{Critical}}$",
+        r"$X^2_{\text{Normal}}$",
+        r"$X^2_{\text{Log Normal}}$",
+        r"$X^2_{\text{Gumbel}}$",
+        r"$X^2_{\text{Log Pearson III}}$",
+    ]
+
+    UPDATE_XAXIS_CHI = {
+        "showticklabels": False,
+        "fixedrange": False,
+        "tickvals": [3],
+        "ticktext": ["X<sup>2</sup>"],
+    }
+
+    for n, dist in zip(range(6, 11), DIST_CHI):
+        fig.update(layout={f"xaxis{n}": UPDATE_XAXIS_CHI})
+        fig.add_annotation(
+            text=dist,
+            showarrow=False,
+            x=0.5,
+            xref=f"x{n} domain",
+            xanchor="center",
+            y=0,
+            yref=f"y{n} domain",
+            yanchor="top",
+            yshift=-4,
+        )
+
+    [
+        fig.update(layout={f"yaxis{n}": {"showticklabels": False, "showgrid": False}})
+        for n in [8, 10, 12, 14]
+    ]
+
+    fig.add_annotation(
+        text=r"$\text{Chi-Square }(X^{2}_{\text{Critical}} \le X^2_{\text{Distribution}})$",
+        showarrow=False,
+        x=0.5,
+        xref="x8 domain",
+        xanchor="center",
+        y=1,
+        yref="y8 domain",
+        yanchor="bottom",
+        yshift=4,
+    )
+
+    fig.update_layout(
+        margin=dict(t=30, r=0),
+        uniformtext_minsize=16,
+        uniformtext_mode="hide",
+    )
 
     return fig

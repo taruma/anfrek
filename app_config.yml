@@ -7,6 +7,7 @@ DASH_APP:
 TEMPLATE:
   WATERMARK_SOURCE: https://raw.githubusercontent.com/fiakoenjiniring/static-assets/main/logo/watermark.png
   THEME: UNITED
+  # THEME: SKETCHY
 
 VERSION: v1.0.0
 GITHUB_LINK: https://github.com/fiakoenjiniring/frequency-analysis

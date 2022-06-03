@@ -351,7 +351,7 @@ TAB_FIT = dbc.Row(
                 dbc.Card(
                     dbc.CardBody(
                         [
-                            html.H3("VISUALIZATION", className="fw-bold text-center"),
+                            html.H3("GOODNESS OF FIT VISUALIZATION", className="fw-bold text-center"),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
                                     pyfigure.figure_empty(height=450, margin_all=50)

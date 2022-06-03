@@ -266,7 +266,18 @@ def callback_calc_fit(
 
     alpha = float(alpha)
 
-    fig_viz = pyfigure.figure_fit_viz(
+    fig_fit_viz = pyfigure.figure_fit_viz(
+        dataframe,
+        alpha,
+        src_ks,
+        src_chisquare,
+        src_normal,
+        src_lognormal,
+        src_gumbel,
+        src_logpearson3,
+    )
+
+    fig_fit_result = pyfigure.figure_fit_result(
         dataframe,
         alpha,
         src_ks,
@@ -277,8 +288,8 @@ def callback_calc_fit(
         src_logpearson3,
     )
     return (
-        dcc.Graph(figure=fig_viz, mathjax=True),
-        dcc.Graph(figure=fig_viz),
+        dcc.Graph(figure=fig_fit_viz, mathjax=True),
+        dcc.Graph(figure=fig_fit_result, mathjax=True),
         False,
         False,
     )
