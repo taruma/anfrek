@@ -147,3 +147,48 @@ def transform_return_period(return_period):
             print(e)
 
     return result
+
+
+def generate_dataframe_freq(
+    dataframe: pd.DataFrame,
+    return_period: list[int],
+    src_normal: str,
+    src_lognormal: str,
+    src_gumbel: str,
+    src_logpearson3: str,
+) -> pd.DataFrame:
+    from hidrokit.contrib.taruma import anfrek
+
+    dataframe = dataframe.iloc[:, 0].replace(0, np.nan).dropna().to_frame()
+
+    df_normal = anfrek.freq_normal(
+        dataframe,
+        return_period=return_period,
+        source=src_normal,
+        index_name="Return Period",
+    )
+
+    df_lognormal = anfrek.freq_lognormal(
+        dataframe,
+        return_period=return_period,
+        source=src_lognormal,
+        index_name="Return Period",
+    )
+
+    df_gumbel = anfrek.freq_gumbel(
+        dataframe,
+        return_period=return_period,
+        source=src_gumbel,
+        index_name="Return Period",
+    )
+
+    df_logpearson3 = anfrek.freq_logpearson3(
+        dataframe,
+        return_period=return_period,
+        source=src_logpearson3,
+        index_name="Return Period",
+    )
+
+    result = pd.concat([df_normal, df_lognormal, df_gumbel, df_logpearson3], axis=1)
+
+    return result

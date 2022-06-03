@@ -202,5 +202,37 @@ def callback_calc_freq(
     return dcc.Graph(figure=fig), False, False
 
 
+@app.callback(
+    Output("download-freq", "data"),
+    Input("button-freq-download", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+    State("input-freq-return-period", "value"),
+    State("select-freq-normal", "value"),
+    State("select-freq-lognormal", "value"),
+    State("select-freq-gumbel", "value"),
+    State("select-freq-logpearson3", "value"),
+)
+def callback_down_freq(
+    _,
+    table_data,
+    table_columns,
+    return_period,
+    src_normal,
+    src_lognormal,
+    src_gumbel,
+    src_logpearson3,
+):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    return_period = pyfunc.transform_return_period(return_period)
+
+    result = pyfunc.generate_dataframe_freq(
+        dataframe, return_period, src_normal, src_lognormal, src_gumbel, src_logpearson3
+    )
+
+    return dcc.send_data_frame(result.to_csv, "FREQUENCY.CSV")
+
+
 if __name__ == "__main__":
     app.run(debug=DEBUG)
