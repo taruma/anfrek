@@ -437,6 +437,20 @@ def figure_distribution(dataframe: pd.DataFrame) -> go.Figure:
         bgcolor="rgba(255, 255, 255, 0.8)",
     )
 
+    fig.add_annotation(
+        text=f"${3 * Cv:.2f}$",
+        showarrow=False,
+        x=1,
+        xref="x3 domain",
+        xanchor="left",
+        y=3 * Cv,
+        yref="y3",
+        yanchor="middle",
+        yshift=0,
+        xshift=5,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+    )
+
     # GUMBEL
 
     x_gumbel = r"$C_s \approx 1.1396$,$C_k \approx 5.4002$".split(",")
@@ -718,7 +732,7 @@ def figure_fit_viz(
         y=bar_y,
         orientation="h",
         showlegend=False,
-        hovertemplate="<b>%{customdata}</b>: <i>%{x}</i><extra></extra>",
+        hovertemplate="<b>R<sub>%{customdata}</sub></b>: <i>%{x}</i><extra></extra>",
         customdata=np.arange(1, series.size + 1)[::-1],
     )
 
@@ -781,6 +795,7 @@ def figure_fit_viz(
         x = ksdf.x
         p_w = ksdf.p_w
         p_d = ksdf.p_d
+        no = ksdf.no
 
         return [
             go.Scatter(
@@ -789,14 +804,15 @@ def figure_fit_viz(
                 mode="markers+lines",
                 showlegend=False,
                 name="Prob Weibull",
-                line_shape="spline",
+                line_shape="hvh",
                 line_color=pytemplate.fktemplate.layout.colorway[0],
                 marker_size=8,
                 marker_line_width=2,
                 marker_line_color=pytemplate.fktemplate.layout.colorway[0],
                 marker_symbol="x-thin",
                 marker_opacity=0.3,
-                hovertemplate="val=%{x}<br>prob=%{y:.2f}",
+                hovertemplate="R<sub>%{customdata}</sub>: <b>%{x}</b><br>prob=<b>%{y:.2f}</b>",
+                customdata=no,
             ),
             go.Scatter(
                 x=x,
@@ -811,7 +827,8 @@ def figure_fit_viz(
                 marker_line_color=pytemplate.fktemplate.layout.colorway[1],
                 marker_symbol="x-thin",
                 marker_opacity=0.3,
-                hovertemplate="val=%{x}<br>prob=%{y:.2f}",
+                hovertemplate="R<sub>%{customdata}</sub>: <b>%{x}</b><br>prob=<b>%{y:.2f}</b>",
+                customdata=no,
             ),
         ]
 
@@ -902,7 +919,10 @@ def figure_fit_viz(
         # print(counter)
 
         counter_text = "<br>".join(
-            [f"C{group}:{count}" for group, count in enumerate(counter, 1)][::-1]
+            [
+                f"C<sub>{group}</sub>: <b>{count}</b>"
+                for group, count in enumerate(counter, 1)
+            ][::-1]
         )
         fig.add_annotation(
             text="Classes",
@@ -1138,6 +1158,8 @@ def figure_fit_result(
         marker_opacity = mask.replace(False, 0.3).replace(True, 0.8)
         marker_opacity_bar = mask.replace(False, 0.2).replace(True, 0.5)
         marker_line_color = mask.replace(False, base_color).replace(True, next_color)
+        customdata = no.copy()
+        customdata[mask] = "max"
 
         return [
             go.Bar(
@@ -1161,7 +1183,8 @@ def figure_fit_result(
                 marker_line_color=marker_line_color,
                 marker_symbol=marker_symbol,
                 marker_opacity=marker_opacity,
-                hovertemplate="R<sub>%{x}</sub><sup>d</sup>: <b>%{y:.2f}</b><extra></extra>",
+                hovertemplate="d<sub>%{customdata}</sub>: <b>%{y:.2f}</b><extra></extra>",
+                customdata=customdata,
             ),
         ]
 
@@ -1235,12 +1258,13 @@ def figure_fit_result(
 
     # PLOT
 
-    def x_chisquare(chidf: pd.DataFrame, dist: str):
+    def x_chisquare(chidf: pd.DataFrame, dist: str, xcalc: list = None):
         from itertools import cycle, islice
 
         fe = chidf.fe
         ft = chidf.ft
         x_calc = np.sum(np.power(2, (fe - ft)) / ft)
+        xcalc.append(x_calc)
 
         no = chidf.index
 
@@ -1290,26 +1314,27 @@ def figure_fit_result(
         ]
 
     SECONDARY = (False, True, True)
+    xcalc = []
 
-    x2_normal = x_chisquare(chi_normal, "Normal")
+    x2_normal = x_chisquare(chi_normal, "Normal", xcalc)
     [
         fig.add_trace(_graph, row=2, col=2, secondary_y=sec_y)
         for _graph, sec_y in zip(x2_normal, SECONDARY)
     ]
 
-    x2_lognormal = x_chisquare(chi_lognormal, "Log Normal")
+    x2_lognormal = x_chisquare(chi_lognormal, "Log Normal", xcalc)
     [
         fig.add_trace(_graph, row=2, col=3, secondary_y=sec_y)
         for _graph, sec_y in zip(x2_lognormal, SECONDARY)
     ]
 
-    x2_gumbel = x_chisquare(chi_gumbel, "Gumbel")
+    x2_gumbel = x_chisquare(chi_gumbel, "Gumbel", xcalc)
     [
         fig.add_trace(_graph, row=2, col=4, secondary_y=sec_y)
         for _graph, sec_y in zip(x2_gumbel, SECONDARY)
     ]
 
-    x2_logpearson3 = x_chisquare(chi_logpearson3, "Log Pearson III")
+    x2_logpearson3 = x_chisquare(chi_logpearson3, "Log Pearson III", xcalc)
     [
         fig.add_trace(_graph, row=2, col=5, secondary_y=sec_y)
         for _graph, sec_y in zip(x2_logpearson3, SECONDARY)
@@ -1340,6 +1365,23 @@ def figure_fit_result(
         "fixedrange": False,
     }
 
+    for n, _ksdf in zip(
+        range(2, 6), [ks_normal, ks_lognormal, ks_gumbel, ks_logpearson3]
+    ):
+        fig.add_annotation(
+            text=f"$\\text{{max}}(\\Delta)={_ksdf.d.max():.2f}$",
+            x=0.02,
+            xref=f"x{n} domain",
+            xanchor="left",
+            y=0.98,
+            yref=f"y{n} domain",
+            yanchor="top",
+            xshift=2,
+            yshift=-2,
+            showarrow=False,
+            font_size=13,
+        )
+
     DIST_KS = [
         r"$\Delta_{\text{Critical}}$",
         r"$\Delta_{\text{Normal}}$",
@@ -1363,7 +1405,7 @@ def figure_fit_result(
         )
 
     fig.add_annotation(
-        text=r"$\text{Kolmogorov-Smirnov }(\Delta_{\text{Critical}} \le \Delta_{\text{Distribution}})$",
+        text=r"$\text{Kolmogorov-Smirnov }(\text{max}(\Delta_{\text{Distribution}}) \le \Delta_{\text{Critical}})$",
         showarrow=False,
         x=0.5,
         xref="x3 domain",
@@ -1389,6 +1431,21 @@ def figure_fit_result(
         "ticktext": ["X<sup>2</sup>"],
     }
 
+    for n_x, n_y, _xcalc in zip(range(7, 11), range(7, 14, 2), xcalc):
+        fig.add_annotation(
+            text=f"$X^2={_xcalc:.2f}$",
+            x=0.02,
+            xref=f"x{n_x} domain",
+            xanchor="left",
+            y=0.98,
+            yref=f"y{n_y} domain",
+            yanchor="top",
+            xshift=2,
+            yshift=-2,
+            showarrow=False,
+            font_size=13,
+        )
+
     for n, dist in zip(range(6, 11), DIST_CHI):
         fig.update(layout={f"xaxis{n}": UPDATE_XAXIS_CHI})
         fig.add_annotation(
@@ -1409,7 +1466,7 @@ def figure_fit_result(
     ]
 
     fig.add_annotation(
-        text=r"$\text{Chi-Square }(X^{2}_{\text{Critical}} \le X^2_{\text{Distribution}})$",
+        text=r"$\text{Chi-Square }(X^2_{\text{Distribution}} \le X^{2}_{\text{Critical}})$",
         showarrow=False,
         x=0.5,
         xref="x8 domain",
