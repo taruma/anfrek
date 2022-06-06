@@ -1,5 +1,6 @@
 from pathlib import Path
 import dash
+import dash_auth
 from dash import Output, Input, State, dcc
 from pyconfig import appConfig
 from pytemplate import fktemplate
@@ -14,6 +15,15 @@ pio.templates.default = fktemplate
 APP_TITLE = appConfig.DASH_APP.APP_TITLE
 UPDATE_TITLE = appConfig.DASH_APP.UPDATE_TITLE
 DEBUG = appConfig.DASH_APP.DEBUG
+
+# DASH AUTH
+VALID_USERNAME_PASSWORD_PAIRS = {
+    "fiakoenjiniring": "fiakosuper#",
+    "taruma": "fiakosuper#",
+    "maya": "fiakosuper#",
+    "demo": "donotsharethisaccount#"
+}
+
 
 # BOOTSTRAP THEME
 THEME = appConfig.TEMPLATE.THEME
@@ -33,7 +43,7 @@ app = dash.Dash(
     suppress_callback_exceptions=True,
     prevent_initial_callbacks=True,
 )
-
+auth = dash_auth.BasicAuth(app, VALID_USERNAME_PASSWORD_PAIRS)
 server = app.server
 
 # LAYOUT APP
