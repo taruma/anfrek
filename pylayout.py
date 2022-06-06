@@ -29,6 +29,7 @@ HTML_ROW_BUTTON_UPLOAD = html.Div(
             color="info",
             id="button-upload",
             class_name="m-2",
+            size="lg",
         ),
         id="dcc-upload",
         multiple=False,
@@ -37,9 +38,27 @@ HTML_ROW_BUTTON_UPLOAD = html.Div(
     className="text-center",
 )
 
+HTML_ROW_BUTTON_DOWNLOAD_TABLE = html.Div(
+    [
+        dbc.Button(
+            "Download Table",
+            color="success",
+            id="button-download-table",
+            class_name="m-2",
+            size="md",
+            disabled=True,
+        ),
+        dcc.Download(id="download-table"),
+    ]
+)
+
 HTML_ROW_BUTTON_EXAMPLE = html.Div(
     dbc.Button(
-        "Use Example Data", color="secondary", id="button-example", class_name="m-2"
+        "Use Example Data",
+        color="secondary",
+        id="button-example",
+        class_name="m-2",
+        size="sm",
     )
 )
 
@@ -327,7 +346,7 @@ TAB_FIT = dbc.Row(
                                         className="me-3 my-2",
                                     ),
                                     dbc.Button(
-                                        "DOWNLOAD GOODNESSOFFIT.CSV",
+                                        "DOWNLOAD ALL RESULTS",
                                         id="button-fit-download",
                                         color="success",
                                         size="md",
@@ -335,6 +354,8 @@ TAB_FIT = dbc.Row(
                                         outline=True,
                                         disabled=True,
                                     ),
+                                    dcc.Download(id="download-fit-ks"),
+                                    dcc.Download(id="download-fit-chisquare"),
                                     dcc.Download(id="download-fit"),
                                 ],
                                 className="my-3 text-center",
@@ -351,7 +372,10 @@ TAB_FIT = dbc.Row(
                 dbc.Card(
                     dbc.CardBody(
                         [
-                            html.H3("GOODNESS OF FIT VISUALIZATION", className="fw-bold text-center"),
+                            html.H3(
+                                "GOODNESS OF FIT VISUALIZATION",
+                                className="fw-bold text-center",
+                            ),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
                                     pyfigure.figure_empty(height=450, margin_all=50)

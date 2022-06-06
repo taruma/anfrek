@@ -11,16 +11,15 @@ def parse_upload_data(content: str, filename: str):
     decoded = base64.b64decode(content_string)
 
     try:
-        if filename.endswith(".csv"):
+        if filename.lower().endswith(".csv"):
             dataframe = pd.read_csv(
                 io.StringIO(decoded.decode("utf-8")), index_col=0, parse_dates=True
             )
-        elif filename.endswith(".xlsx") or filename.endswith(".xls"):
+        elif filename.lower().endswith(".xlsx") or filename.lower().endswith(".xls"):
             return (
                 html.Div(
                     [
                         "Fitur pembacaan berkas excel masih dalam tahap pengembangan.",
-                        " Template yang akan digunakan adalah hidrokit excel template.",
                     ],
                     className="text-center bg-danger text-white fs-4",
                 ),
@@ -192,3 +191,133 @@ def generate_dataframe_freq(
     result = pd.concat([df_normal, df_lognormal, df_gumbel, df_logpearson3], axis=1)
 
     return result
+
+
+def generate_report_fit(
+    dataframe: pd.DataFrame,
+    alpha: float,
+    src_ks: str,
+    src_chisquare: str,
+    src_normal: str,
+    src_lognormal: str,
+    src_gumbel: str,
+    src_logpearson3: str,
+) -> pd.DataFrame:
+    from hktaruma import hk140, hk141
+
+    dist_name = "Normal,Log Normal,Gumbel,Log Pearson III".split(",")
+    dist_name_lower = "normal,lognormal,gumbel,logpearson3".split(",")
+
+    # KS
+
+    ks_normal = hk140.kstest(
+        dataframe,
+        dist="normal",
+        source_dist=src_normal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+        report="full",
+    )
+    ks_lognormal = hk140.kstest(
+        dataframe,
+        dist="lognormal",
+        source_dist=src_lognormal,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+        report="full",
+    )
+    ks_gumbel = hk140.kstest(
+        dataframe,
+        dist="gumbel",
+        source_dist=src_gumbel,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+        report="full",
+    )
+    ks_logpearson3 = hk140.kstest(
+        dataframe,
+        dist="logpearson3",
+        source_dist=src_logpearson3,
+        alpha=alpha,
+        source_dcr=src_ks,
+        show_stat=False,
+        report="full",
+    )
+
+    ks_col = [ks_normal, ks_lognormal, ks_gumbel, ks_logpearson3]
+    ks_frame = pd.concat(ks_col, keys=dist_name, axis=1)
+
+    # CHI SQUARE
+
+    chi_normal = hk141.chisquare(
+        dataframe,
+        dist="normal",
+        source_dist=src_normal,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    ).rename({"batas_kelas": "classes"}, axis=1)
+    chi_lognormal = hk141.chisquare(
+        dataframe,
+        dist="lognormal",
+        source_dist=src_lognormal,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    ).rename({"batas_kelas": "classes"}, axis=1)
+    chi_gumbel = hk141.chisquare(
+        dataframe,
+        dist="gumbel",
+        source_dist=src_gumbel,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    ).rename({"batas_kelas": "classes"}, axis=1)
+    chi_logpearson3 = hk141.chisquare(
+        dataframe,
+        dist="logpearson3",
+        source_dist=src_logpearson3,
+        alpha=alpha,
+        source_xcr=src_chisquare,
+        show_stat=False,
+    ).rename({"batas_kelas": "classes"}, axis=1)
+
+    chi_col = [chi_normal, chi_lognormal, chi_gumbel, chi_logpearson3]
+    chi_frame = pd.concat(chi_col, keys=dist_name, axis=1)
+
+    # REPORT
+    series = dataframe.iloc[:, 0]
+
+    # CHI REPORT
+    n_class = hk141._calc_k(series.size)
+    xcr = hk141.calc_xcr(alpha, dk=hk141._calc_dk(n_class, 2), source=src_chisquare)
+
+    x2calc = []
+    for _dist in chi_frame.columns.levels[0]:
+        _chi = chi_frame[_dist]
+        _x2 = np.sum(np.power(2, (_chi.fe - _chi.ft)) / _chi.ft)
+        x2calc.append(_x2)
+
+    x2calcs = pd.Series(x2calc, index=dist_name_lower)
+
+    report_fit = (
+        "[GOODNESS OF FIT]\n"
+        f"N = {series.size}\n\n"
+        "[KOLMOGOROV-SMIRNOV]\n"
+        f"DELTA_CRITICAL = {hk140.calc_dcr(alpha, series.size, source=src_ks)}\n"
+        f"DELTA_NORMAL = {ks_normal.d.max()}\n"
+        f"DELTA_LOGNORMAL = {ks_lognormal.d.max()}\n"
+        f"DELTA_GUMBEL = {ks_gumbel.d.max()}\n"
+        f"DELTA_LOGPEARSON3 = {ks_logpearson3.d.max()}\n\n"
+        "[CHI SQUARE]\n"
+        f"X2_CRITICAL = {xcr}\n"
+        f"X2_NORMAL = {x2calcs.normal}\n"
+        f"X2_LOGNORMAL = {x2calcs.lognormal}\n"
+        f"X2_GUMBEL = {x2calcs.gumbel}\n"
+        f"X2_LOGPEARSON3 = {x2calcs.logpearson3}\n"
+    )
+
+    return (ks_frame, chi_frame, report_fit)

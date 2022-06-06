@@ -46,6 +46,7 @@ app.layout = dbc.Container(
                         pylayout.HTML_ROW_TITLE,
                         pylayout.HTML_ROW_BUTTON_UPLOAD,
                         pylayout.HTML_ROW_BUTTON_EXAMPLE,
+                        pylayout.HTML_ROW_BUTTON_DOWNLOAD_TABLE,
                     ],
                     md=3,
                     align="start",
@@ -71,10 +72,10 @@ app.layout = dbc.Container(
 
 @app.callback(
     Output("row-table-data", "children"),
-    # Output("row-troubleshooter", "children"),
     Output("card-stat", "disabled"),
     Output("card-frequency", "disabled"),
     Output("card-goodness", "disabled"),
+    Output("button-download-table", "disabled"),
     Input("dcc-upload", "contents"),
     State("dcc-upload", "filename"),
     State("dcc-upload", "last_modified"),
@@ -94,6 +95,7 @@ def callback_upload(content, filename, filedate, _):
     tab_stat_disabled = True
     tab_frequency_disabled = True
     tab_goodness_disabled = True
+    button_download_disabled = True
 
     if dataframe is None:
         children = report
@@ -109,12 +111,14 @@ def callback_upload(content, filename, filedate, _):
         tab_stat_disabled = False
         tab_frequency_disabled = False
         tab_goodness_disabled = False
+        button_download_disabled = False
 
     return (
         children,
         tab_stat_disabled,
         tab_frequency_disabled,
         tab_goodness_disabled,
+        button_download_disabled,
     )
 
 
@@ -231,7 +235,7 @@ def callback_down_freq(
         dataframe, return_period, src_normal, src_lognormal, src_gumbel, src_logpearson3
     )
 
-    return dcc.send_data_frame(result.to_csv, "FREQUENCY.CSV")
+    return dcc.send_data_frame(result.to_csv, "FREQUENCY.csv")
 
 
 @app.callback(
@@ -293,6 +297,67 @@ def callback_calc_fit(
         False,
         False,
     )
+
+
+@app.callback(
+    Output("download-fit-ks", "data"),
+    Output("download-fit-chisquare", "data"),
+    Output("download-fit", "data"),
+    Input("button-fit-download", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+    State("input-fit-alpha", "value"),
+    State("select-fit-ks", "value"),
+    State("select-fit-chisquare", "value"),
+    State("select-freq-normal", "value"),
+    State("select-freq-lognormal", "value"),
+    State("select-freq-gumbel", "value"),
+    State("select-freq-logpearson3", "value"),
+)
+def callback_download_fit(
+    _,
+    table_data,
+    table_columns,
+    alpha,
+    src_ks,
+    src_chisquare,
+    src_normal,
+    src_lognormal,
+    src_gumbel,
+    src_logpearson3,
+):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    alpha = float(alpha)
+
+    ks_frame, chi_frame, report_fit = pyfunc.generate_report_fit(
+        dataframe,
+        alpha,
+        src_ks,
+        src_chisquare,
+        src_normal,
+        src_lognormal,
+        src_gumbel,
+        src_logpearson3,
+    )
+
+    return (
+        dcc.send_data_frame(ks_frame.to_csv, "KS.csv"),
+        dcc.send_data_frame(chi_frame.to_csv, "CHI.csv"),
+        {"content": report_fit, "filename": "FIT.TXT"},
+    )
+
+
+@app.callback(
+    Output("download-table", "data"),
+    Input("button-download-table", "n_clicks"),
+    State("output-table", "derived_virtual_data"),
+    State("output-table", "columns"),
+)
+def callback_download_table(_, table_data, table_columns):
+    dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
+
+    return dcc.send_data_frame(dataframe.to_csv, "TABLE.csv")
 
 
 if __name__ == "__main__":

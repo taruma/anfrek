@@ -239,7 +239,7 @@ def figure_statout(dataframe: pd.DataFrame) -> go.Figure:
         yanchor="bottom",
     )
     fig.add_annotation(
-        text=f"<b>standard deviation: +-{std:.3f}</b>",
+        text=f"<b>standard deviation: &plusmn;{std:.3f}</b>",
         showarrow=False,
         x=1,
         xref="x domain",
@@ -899,6 +899,7 @@ def figure_fit_viz(
         color = list(islice(cycle(colorway), seperator.size))
 
         counter = []
+        sep_classes = []
         for i, fillcolor in zip(range(1, seperator.size), color):
             fig.add_shape(
                 type="rect",
@@ -914,7 +915,14 @@ def figure_fit_viz(
             )
             left = -np.inf if i == 1 else seperator[i - 1]
             right = np.inf if i == seperator.size - 1 else seperator[i]
+            if i == 1:
+                _text = f"C<sub>{i}</sub>: <i>x</i> &#8804; {seperator[i]:.3f}"
+            elif i == (seperator.size - 1):
+                _text = f"C<sub>{i}</sub>: <i>x</i> &gt; {seperator[i-1]:.3f}"
+            else:
+                _text = f"C<sub>{i}</sub>: {seperator[i-1]:.3f} &lt; <i>x</i> &#8804; {seperator[i]:.3f}"
             counter.append(series.between(left, right, inclusive="right").sum())
+            sep_classes.append(_text)
 
         # print(counter)
 
@@ -924,8 +932,10 @@ def figure_fit_viz(
                 for group, count in enumerate(counter, 1)
             ][::-1]
         )
+        counter_classes = "<br>".join(sep_classes[::-1])
+
         fig.add_annotation(
-            text="Classes",
+            text=counter_text,
             showarrow=False,
             x=0.02,
             xref=f"x{n} domain",
@@ -934,11 +944,11 @@ def figure_fit_viz(
             yref=f"y{n} domain",
             yanchor="middle",
             yshift=2,
-            align="center",
+            align="left",
             bordercolor=pytemplate.fktemplate.layout.font.color,
             bgcolor=pytemplate.fktemplate.layout.paper_bgcolor,
             borderwidth=1,
-            hovertext=counter_text,
+            hovertext=counter_classes,
         )
 
     sep_normal = create_class_sep(n_class, anfrek.freq_normal, series, src_normal)
