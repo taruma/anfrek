@@ -62,6 +62,27 @@ HTML_ROW_BUTTON_EXAMPLE = html.Div(
     )
 )
 
+HTML_ROW_CREATED_BY = html.P(
+    [
+        "created by ",
+        html.A("taruma", href="https://github.com/taruma"),
+        " & powered by ",
+        html.A("hidrokit", href="https://github.com/hidrokit/hidrokit"),
+    ],
+    className="text-center fs-5",
+)
+
+NOTE = """
+#### Catatan:
+- Data yang diupload harus berupa .csv dengan ketentuan sebagai berikut:
+    - Data memiliki hanya dua kolom (dengan pemisah satu koma (,)).
+    - Kolom pertama dilabeli dengan `DATE`, yang berisikan tahun saja atau tanggal. Aplikasi menerima nilai `1999` atau `1999-01-01`.
+    - Kolom kedua dapat dilabeli secara bebas, dengan berisikan angka.
+"""
+
+HTML_ROW_NOTE = html.Div(dcc.Markdown(NOTE), className="text-start my-2")
+
+
 # FOOTER
 
 HTML_FOOTER = html.Div(

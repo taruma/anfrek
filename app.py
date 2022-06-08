@@ -21,7 +21,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     "fiakoenjiniring": "fiakosuper#",
     "taruma": "fiakosuper#",
     "maya": "fiakosuper#",
-    "demo": "donotsharethisaccount#"
+    "demo": "donotsharethisaccount#",
 }
 
 
@@ -54,9 +54,11 @@ app.layout = dbc.Container(
                 dbc.Col(
                     [
                         pylayout.HTML_ROW_TITLE,
+                        pylayout.HTML_ROW_CREATED_BY,
                         pylayout.HTML_ROW_BUTTON_UPLOAD,
                         pylayout.HTML_ROW_BUTTON_EXAMPLE,
                         pylayout.HTML_ROW_BUTTON_DOWNLOAD_TABLE,
+                        pylayout.HTML_ROW_NOTE,
                     ],
                     md=3,
                     align="start",
