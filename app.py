@@ -20,9 +20,12 @@ DEBUG = appConfig.DASH_APP.DEBUG
 # DASH AUTH
 VALID_USERNAME_PASSWORD_PAIRS = {
     "fiakoenjiniring": "fiakosuper#",
-    "taruma": "fiakosuper#",
+    "taruma": "taruma.info",
     "maya": "fiakosuper#",
     "demo": "donotsharethisaccount#",
+    "alphauser": "fiako.engineering",
+    "fiako": "satunya1",
+    "hidrokit": "sindikat",
 }
 
 
