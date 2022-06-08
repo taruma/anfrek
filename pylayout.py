@@ -92,7 +92,7 @@ HTML_FOOTER = html.Div(
             " 2022 ",
             html.A(
                 "PT. FIAKO ENJINIRING INDONESIA",
-                href="https://fiako.co.id/",
+                href="https://fiako.engineering/",
             ),
             ".",
         ],
