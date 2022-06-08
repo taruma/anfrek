@@ -4,6 +4,7 @@ import dash_auth
 from dash import Output, Input, State, dcc
 from pyconfig import appConfig
 from pytemplate import fktemplate
+from flask import request, redirect
 import dash_bootstrap_components as dbc
 import plotly.io as pio
 import pylayout, pyfunc, pylayoutfunc, pyfigure  # noqa
@@ -78,6 +79,15 @@ app.layout = dbc.Container(
     fluid=True,
     class_name="dbc my-3 px-3",
 )
+
+
+@server.before_request
+def before_request():
+    if not request.is_secure:
+        url = request.url.replace("http://", "https://", 1)
+        code = 301
+        return redirect(url, code=code)
+
 
 # CALLBACK FUNCTION
 
