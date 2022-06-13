@@ -203,7 +203,7 @@ def generate_report_fit(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> pd.DataFrame:
-    from hktaruma import hk140, hk141
+    from hidrokit.contrib.taruma import hk140, hk141
 
     dist_name = "Normal,Log Normal,Gumbel,Log Pearson III".split(",")
     dist_name_lower = "normal,lognormal,gumbel,logpearson3".split(",")

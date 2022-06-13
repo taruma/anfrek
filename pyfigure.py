@@ -572,7 +572,7 @@ def figure_freq(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> go.Figure:
-    from hktaruma import anfrek
+    from hidrokit.contrib.taruma import anfrek
     from itertools import cycle, islice
 
     ROWS = 2
@@ -697,8 +697,8 @@ def figure_fit_viz(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> go.Figure:
-    from hktaruma import hk140, hk141
-    from hktaruma import anfrek
+    from hidrokit.contrib.taruma import hk140, hk141
+    from hidrokit.contrib.taruma import anfrek
 
     series = dataframe.iloc[:, 0].replace(0, np.nan).dropna()
     dataframe = series.to_frame()
@@ -1069,7 +1069,7 @@ def figure_fit_result(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> go.Figure:
-    from hktaruma import hk140, hk141
+    from hidrokit.contrib.taruma import hk140, hk141
 
     series = dataframe.iloc[:, 0].replace(0, np.nan).dropna()
     dataframe = series.to_frame()
