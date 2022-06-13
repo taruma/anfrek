@@ -1,7 +1,7 @@
 dash==2.4.1
 dash_bootstrap_components==1.1.0
 dash_bootstrap_templates==1.0.5
-hidrokit==0.4.0
+hidrokit==0.4.1
 numpy==1.22.3
 pandas==1.4.2
 plotly==5.8.0
