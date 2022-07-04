@@ -71,6 +71,10 @@
 <span align="center">Download Hasil Pengujian</span>
 </div>
 
+## TUTORIAL
+
+Tutorial bisa dilihat pada dokumen [TUTORIAL.md](./docs/TUTORIAL.md)
+
 ## KEKURANGAN
 
 Berikut daftar kekurangan atau _known issues_ aplikasi ini:
