@@ -1,39 +1,89 @@
 # FREQUENCY ANALYSIS IN HYDROLOGY (fiako-anfrek)
 
-**Frequency Analysis in Hydrology** (fiako-anfrek) adalah aplikasi web yang dapat digunakan untuk menghitung parameter statistik, jenis sebarannya (distribusinya), analisis frekuensi, dan uji kecocokan distribusi. Output aplikasi ini berupa visualisasi hasil perhitungan dan tabel/teks berupa .csv/.txt. 
+<div align="center">
+<img src="./_readme/fiakodev-anfrek-thumbnail.png" alt="fiako-anfrek thumbnail"><br>
 
-Versi Live: v1.0.0-beta.x
+<img alt="developed by" src="https://img.shields.io/badge/developed%20by-fiakodev-orange">
+<img alt="project by" src="https://img.shields.io/badge/project%20by-PT.%20FIAKO%20ENJINIRING%20INDONESIA-blue">
+<img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/anfrek.svg">
+<br>
+<img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/anfrek.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/anfrek.svg?logo=github">
+</div>
 
-## FITUR
+**Frequency Analysis in Hydrology** atau `fiako-anfrek` adalah aplikasi web yang dapat digunakan untuk menghitung parameter statistik, jenis sebarannya (distribusi), analisis frekuensi, dan uji kecocokan distribusi. Output aplikasi ini berupa visualisasi hasil perhitungan dan tabel/teks berupa .csv/.txt. 
 
-Aplikasi ini memiliki beberapa fitur berupa:
+## FITUR APLIKASI
 
-- Visualisasikan data hujan/debit maksimum tahunan dalam bentuk bar chart dan bubble chart sehingga memudahkan mengidentifikasi kejadian ekstrim.
-- Melakukan perubahan atau filter data secara langsung yang dapat mengubah hasil grafik/perhitungan di analisis berikutnya.
-- Menghitung parameter statistik deskriptif (rata-rata, standar deviasi, median, Q1, Q3, min, max) dan menghitung outlier (batas bawah dan atas) berdasarkan buku Applied Hydrology oleh Ven Te Chow. 
-- Melihat jenis sebaran/distribusi (Cv, Cs, Ck) berdasarkan SNI: 2415:2016 Tata Cara Perhitungan Debit Banjir Rencana dalam bentuk visualisasi data.
-- Menghitung analisis frekuensi dengan periode ulang bebas dengan distribusi normal, lognormal, gumbel, logpearson3 beserta visualisasinya.
-- Menghitung uji kecocokan distribusi menggunakan metode Kolmogorov-Smirnov (KS) dan Chi Square (CHI) dengan visualisasinya berupa Cumulative Distribution Function (CDF) untuk KS dan pembagian kelas untuk CHI.
-- Metode perhitungan analisis frekuensi bisa menggunakan berbagai sumber. Baik dari buku/tabel ataupun perhitungan. Nilai default yang saya rekomendasikan adalah scipy kecuali distribusi gumbel, menggunakan tabel dari buku Gumbel.
+<div align="center">
+<h3>Eksplorasi Data Deret Waktu</h3>
+<img src="./_readme/fkanfrek-ft-1-1.gif" width="450">
+<br>
+<span align="center">Interaksi Tabel + Grafik</span>
+</div>
 
-Aplikasi ini menggunakan paket python hidrokit sebagai "mesin" penghitungnya. Kekeliruan saat perhitungan bisa berakar dari paket hidrokitnya. Untuk mengenal lebih jauh mengenai paket python hidrokit kunjungi [repository hidrokit](https://github.com/hidrokit/hidrokit). Aplikasi ini hanya fokus pada visualisasinya.
+<div align="center">
+<h3>Parameter Statistik dan Outlier</h3>
+<img src="./_readme/fkanfrek-ft-2-1.gif" width="450">
+<br>
+<span align="center">Visualisasi Statistik & Outlier</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-2-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Distribusi</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-2-3.gif" width="450">
+<br>
+<span align="center">Download Hasil Perhitungan</span>
+</div>
 
-## PENGGUNAAN
+<div align="center">
+<h3>Analisis Frekuensi</h3>
+<img src="./_readme/fkanfrek-ft-3-1.gif" width="450">
+<br>
+<span align="center">Interaksi Input + Grafik</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-3-2.gif" width="450">
+<br>
+<span align="center">Interaksi Grafik</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-3-3.gif" width="450">
+<br>
+<span align="center">Download Hasil Analisis</span>
+</div>
 
-Berikut ketentuan sebelum mengupload data yang akan analisis:
+<div align="center">
+<h3>Uji Kecocokan Distribusi</h3>
+<img src="./_readme/fkanfrek-ft-4-1.gif" width="450">
+<br>
+<span align="center">Interaksi Input + Grafik</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-4-2.gif" width="450">
+<br>
+<span align="center">Visualisasi Uji Kecocokan Distribusi</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-4-3.gif" width="450">
+<br>
+<span align="center">Visualisasi Hasil Pengujian</span>
+<br><br>
+<img src="./_readme/fkanfrek-ft-4-4.gif" width="450">
+<br>
+<span align="center">Download Hasil Pengujian</span>
+</div>
 
-- File harus menggunakan format `.csv` (Comma Seperated Value).
-- Tabel harus memiliki _header_ dan dua kolom berupa tanggal dan nilai.
-- Pada kolom pertama dilabeli dengan `DATE`, dengan format tanggal dapat berupa tahun saja (`1991` / `YYYY`) atau tanggal (`1991-01-01` / `YYYY-MM-DD`).
-- Kolom kedua dapat dilabeli bebas dengan syarat berisikan angka.
-- Jika terdiri lebih dari dua kolom, hanya dua kolom pertama saja yang diproses. 
+## KEKURANGAN
 
-Untuk penggunaan aplikasi bisa lihat di [TUTORIAL](./docs/TUTORIAL.md).
+Berikut daftar kekurangan atau _known issues_ aplikasi ini:
+
+- Penggunaan distribusi Log Pearson III (terutama untuk memperoleh nilai CDF) harus dievaluasi kembali (untuk sumber scipy).
+- Penentuan kelas dan parameter untuk uji Chi-Square harus dievaluasi kembali. 
+
 
 ## LICENSE
 
 [MIT LICENSE](./LICENSE)
 
+```
 Copyright (c) 2022 PT. FIAKO ENJINIRING INDONESIA
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -53,3 +103,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
