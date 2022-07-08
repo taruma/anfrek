@@ -8,7 +8,11 @@
 <img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/anfrek.svg">
 <br>
 <img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/anfrek.svg?logo=github">
-<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/anfrek.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/anfrek.svg?logo=github"><br>
+
+<a href="https://github.com/fiakoenjiniring/anfrek" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/anfrek</code><br>
+<a href="https://anfrek.dev.fiako.engineering" target="_blank"><strong>Aplikasi</strong></a> // <code>anfrek.dev.fiako.engineering</code><br>
+<a href="https://youtu.be/duhLQgJrS_8" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
 
 **Frequency Analysis in Hydrology** atau `fiako-anfrek` adalah aplikasi web yang dapat digunakan untuk menghitung parameter statistik, jenis sebarannya (distribusi), analisis frekuensi, dan uji kecocokan distribusi. Output aplikasi ini berupa visualisasi hasil perhitungan dan tabel/teks berupa .csv/.txt. 
