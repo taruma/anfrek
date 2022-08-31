@@ -49,6 +49,7 @@ app.layout = dbc.Container(
                         pylayout.HTML_ROW_BUTTON_EXAMPLE,
                         pylayout.HTML_ROW_BUTTON_DOWNLOAD_TABLE,
                         pylayout.HTML_ROW_NOTE,
+                        pylayout.ALERT_END_OF_ONLINE_SERVICE,
                     ],
                     md=3,
                     align="start",
