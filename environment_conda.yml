@@ -1,0 +1,22 @@
+name: anfrek310
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.5
+  - ipykernel
+  - black
+  - flake8
+  - pip
+  - pip:
+    - dash==2.4.1
+    - dash_bootstrap_components==1.1.0
+    - dash_bootstrap_templates==1.0.5
+    - hidrokit==0.4.1
+    - numpy==1.22.3
+    - pandas==1.4.2
+    - plotly==5.8.0
+    - python_box==6.0.2
+    - scipy==1.8.0
+    - pyyaml==6.0
+    - gunicorn==20.1.0

@@ -14,8 +14,8 @@ pio.templates.default = fktemplate
 HTML_ROW_TITLE = html.Div(
     [
         html.H1(appConfig.DASH_APP.APP_TITLE, className="fw-bold"),
-        html.Span("(BETA VERSION)", className="fw-bold"),
-        html.Br(),
+        # html.Span("(BETA VERSION)", className="fw-bold"),
+        # html.Br(),
         html.Span(
             [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
             className="text-muted",
