@@ -12,7 +12,7 @@ __Source:__ [Tango](https://app.tango.us/app/workflow/36c12c56-b997-4cfa-a02d-12
 
 ***
 
-### 1. [Buka Frequency Analysis in Hydrology (fiako-anfrek)](https://anfrek.dev.fiako.engineering)
+### 1. [Buka Frequency Analysis in Hydrology (fiako-anfrek)](https://fiako-anfrek.herokuapp.com)
 
 
 ### 2. Navigasi aplikasi

@@ -11,7 +11,7 @@
 <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/anfrek.svg?logo=github"><br>
 
 <a href="https://github.com/fiakoenjiniring/anfrek" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/anfrek</code><br>
-<a href="https://anfrek.dev.fiako.engineering" target="_blank"><strong>Aplikasi</strong></a> // <code>anfrek.dev.fiako.engineering</code><br>
+<a href="https://fiako-anfrek.herokuapp.com" target="_blank"><strong>Aplikasi</strong></a> // <code>fiako-anfrek.herokuapp.com</code><br>
 <a href="https://youtu.be/duhLQgJrS_8" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
 
