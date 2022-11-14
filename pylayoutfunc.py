@@ -1,3 +1,4 @@
+from __future__ import annotations
 import plotly.graph_objects as go
 from dash import dcc, dash_table
 from pytemplate import fktemplate
