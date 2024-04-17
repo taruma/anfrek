@@ -3,14 +3,13 @@
 <div align="center">
 <img src="./_readme/fiakodev-anfrek-thumbnail.png" alt="fiako-anfrek thumbnail"><br>
 
-<img alt="developed by" src="https://img.shields.io/badge/developed%20by-fiakodev-orange">
-<img alt="project by" src="https://img.shields.io/badge/project%20by-PT.%20FIAKO%20ENJINIRING%20INDONESIA-blue">
-<img alt="License" src="https://img.shields.io/github/license/fiakoenjiniring/anfrek.svg">
+<img alt="developed by" src="https://img.shields.io/badge/developed%20by-taruma-orange">
+<img alt="License" src="https://img.shields.io/github/license/taruma/anfrek.svg">
 <br>
-<img alt="GitHub release" src="https://img.shields.io/github/release/fiakoenjiniring/anfrek.svg?logo=github">
-<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/fiakoenjiniring/anfrek.svg?logo=github"><br>
+<img alt="GitHub release" src="https://img.shields.io/github/release/taruma/anfrek.svg?logo=github">
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/taruma/anfrek.svg?logo=github"><br>
 
-<a href="https://github.com/fiakoenjiniring/anfrek" target="_blank"><strong>Github Repository</strong></a> // <code>fiakoenjiniring/anfrek</code><br>
+<a href="https://github.com/taruma/anfrek" target="_blank"><strong>Github Repository</strong></a> // <code>taruma/anfrek</code><br>
 <a href="https://fiako-anfrek.herokuapp.com" target="_blank"><strong>Aplikasi</strong></a> // <code>fiako-anfrek.herokuapp.com</code><br>
 <a href="https://youtu.be/duhLQgJrS_8" target="_blank"><strong>Presentasi & Demonstrasi</strong></a>
 </div>
@@ -92,6 +91,7 @@ Berikut daftar kekurangan atau _known issues_ aplikasi ini:
 [MIT LICENSE](./LICENSE)
 
 ```
+Copyright (c) 2022-2024 Taruma Sakti Megariansyah
 Copyright (c) 2022 PT. FIAKO ENJINIRING INDONESIA
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
