@@ -1,38 +1,39 @@
 """
 TEMPLATE PLOTLY BASED ON THEME (FKTEMPLATE)
-version: v1.0.0 (modified from fiako-rse)
+version: v1.0.0 (modified from fiako-stations)
 """
 
-import plotly.io as pio
-from dash_bootstrap_templates import load_figure_template
-from pyconfig import appConfig
 from plotly import colors
+from dash_bootstrap_templates import load_figure_template
+import plotly.io as pio
 import plotly.graph_objects as go
+from pyconfig import appConfig
 
 load_figure_template(appConfig.TEMPLATE.THEME.lower())
 fktemplate = pio.templates[pio.templates.default]
 
 # VARS
 _FONT_FAMILY = fktemplate.layout.font.family
-_FONT_COLOR_TUPLE = colors.hex_to_rgb(fktemplate.layout.font.color)
-_FONT_COLOR_RGB_ALPHA = "rgba({},{},{},0.2)".format(*_FONT_COLOR_TUPLE)
+FONT_COLOR_TUPLE = colors.hex_to_rgb(fktemplate.layout.font.color)
+_red, _green, _blue = FONT_COLOR_TUPLE
+FONT_COLOR_RGB_ALPHA = f"rgba({_red},{_green},{_blue},0.2)"
 
 # LAYOUT
 fktemplate.layout.images = [
-    dict(
-        source=appConfig.TEMPLATE.WATERMARK_SOURCE,
-        xref="x domain",
-        yref="y domain",
-        x=0.5,
-        y=0.5,
-        sizex=0.5,
-        sizey=0.5,
-        xanchor="center",
-        yanchor="middle",
-        name="watermark-fiako",
-        layer="below",
-        opacity=0.2,
-    )
+    {
+        "source": appConfig.TEMPLATE.WATERMARK_SOURCE,
+        "xref": "x domain",
+        "yref": "y domain",
+        "x": 0.5,
+        "y": 0.5,
+        "sizex": 0.5,
+        "sizey": 0.5,
+        "xanchor": "center",
+        "yanchor": "middle",
+        "name": "watermark-fiako",
+        "layer": "below",
+        "opacity": 0.2,
+    }
 ]
 
 # GENERAL
@@ -47,9 +48,9 @@ fktemplate.layout.margin.pad = 0
 fktemplate.layout.paper_bgcolor = fktemplate.layout.plot_bgcolor
 
 # LEGEND
-_LEGEND_FONT_SIZE = 15
+LEGEND_FONT_SIZE = 15
 fktemplate.layout.showlegend = True
-fktemplate.layout.legend.font.size = _LEGEND_FONT_SIZE
+fktemplate.layout.legend.font.size = LEGEND_FONT_SIZE
 fktemplate.layout.legend.groupclick = "toggleitem"
 
 
@@ -88,7 +89,7 @@ fktemplate.layout.xaxis.showline = True
 fktemplate.layout.xaxis.linewidth = _XAXIS_LINEWIDTH
 fktemplate.layout.xaxis.linecolor = _XAXIS_GRIDCOLOR
 fktemplate.layout.xaxis.spikecolor = _XAXIS_GRIDCOLOR
-fktemplate.layout.xaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+fktemplate.layout.xaxis.gridcolor = FONT_COLOR_RGB_ALPHA
 fktemplate.layout.xaxis.gridwidth = _XAXIS_LINEWIDTH
 # fktemplate.layout.xaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 fktemplate.layout.xaxis.title.font.size = _XAXIS_TITLE_FONT_SIZE
@@ -109,7 +110,7 @@ fktemplate.layout.yaxis.linewidth = _YAXIS_LINEWIDTH
 fktemplate.layout.yaxis.linecolor = _YAXIS_GRIDCOLOR
 fktemplate.layout.yaxis.spikecolor = _YAXIS_GRIDCOLOR
 fktemplate.layout.yaxis.rangemode = "tozero"
-fktemplate.layout.yaxis.gridcolor = _FONT_COLOR_RGB_ALPHA
+fktemplate.layout.yaxis.gridcolor = FONT_COLOR_RGB_ALPHA
 fktemplate.layout.yaxis.gridwidth = _YAXIS_LINEWIDTH
 # fktemplate.layout.yaxis.title.text = "<b>PLACEHOLDER XAXIS</b>"
 fktemplate.layout.yaxis.title.font.size = _YAXIS_TITLE_FONT_SIZE

@@ -1,11 +1,36 @@
+"""This module contains functions for processing data and generating reports."""
+
 import base64
 import io
 import pandas as pd
 import numpy as np
 from dash import html
+from hidrokit.contrib.taruma import outlier_hydrology, statistical_coefficients
+from hidrokit.contrib.taruma import gumbel, lognormal, normal, logpearson3
+from hidrokit.contrib.taruma import kolmogorov_smirnov, chi_square
+
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements
 
 
 def parse_upload_data(content: str, filename: str):
+    """
+    Parse and process uploaded data based on the file format.
+
+    Args:
+        content (str): The content of the uploaded file.
+        filename (str): The name of the uploaded file.
+
+    Returns:
+        tuple or None: A tuple containing an HTML div element and a DataFrame object
+            if the file format is supported. If the file format is not supported or
+            there is an error, returns a tuple containing
+            an HTML div element with an error message and None.
+
+    Raises:
+        UnicodeDecodeError: If the file is not valid UTF-8.
+        pd.errors.ParserError: If the CSV file is not well-formed.
+        ValueError: If the content string is not valid base64.
+    """
     _, content_string = content.split(",")
 
     decoded = base64.b64decode(content_string)
@@ -34,9 +59,15 @@ def parse_upload_data(content: str, filename: str):
                 ),
                 None,
             )
-    except Exception as e:
+    except UnicodeDecodeError as e:
         print(e)
-        return html.Div([f"There was an error processing this file. {e}"]), None
+        return html.Div([f"File is not valid UTF-8. {e}"]), None
+    except pd.errors.ParserError as e:
+        print(e)
+        return html.Div([f"CSV file is not well-formed. {e}"]), None
+    except ValueError as e:
+        print(e)
+        return html.Div([f"Content string is not valid base64. {e}"]), None
 
     return None, dataframe
 
@@ -48,6 +79,22 @@ def transform_to_dataframe(
     apply_numeric: bool = True,
     parse_dates: list = None,
 ):
+    """
+    Transform table data into a pandas DataFrame.
+
+    Args:
+        table_data (list): The table data to be transformed.
+        table_columns (list): The columns of the table.
+        multiindex (bool, optional): Whether to use a multi-index for the DataFrame.
+            Defaults to False.
+        apply_numeric (bool, optional): Whether to apply numeric conversion to the DataFrame.
+            Defaults to True.
+        parse_dates (list, optional): List of column names to parse as dates.
+            Defaults to None.
+
+    Returns:
+        pandas.DataFrame: The transformed DataFrame.
+    """
 
     if multiindex is True:
         dataframe = pd.DataFrame(table_data)
@@ -92,18 +139,25 @@ def transform_to_dataframe(
 
 
 def generate_report_statout(dataframe: pd.DataFrame) -> str:
-    from hidrokit.contrib.taruma import hk158, hk151
+    """
+    Generate a statistical report based on the given dataframe.
 
+    Args:
+        dataframe (pd.DataFrame): The input dataframe.
+
+    Returns:
+        str: The generated statistical report.
+
+    """
     series = dataframe.iloc[:, 0]
-
     describe = series.describe()
     count, mean, std, smin, p25, p50, p75, smax = describe.to_list()
-    Cv, Cs, Ck = hk158.calc_coef(series)
+    coef_cv, coef_cs, coef_ck = statistical_coefficients.calc_coef(series)
     std0 = series.std(ddof=0)
-    Kn = hk151.find_Kn(count)
+    kn_value = outlier_hydrology.find_Kn(count)
     mean_log = series.apply(np.log10).mean()
     std_log = series.apply(np.log10).std()
-    lower_bound, upper_bound = hk151.calc_boundary(
+    lower_bound, upper_bound = outlier_hydrology.calc_boundary(
         series.replace(0, np.nan).dropna().to_frame()
     )
 
@@ -119,12 +173,12 @@ def generate_report_statout(dataframe: pd.DataFrame) -> str:
         f"75P = {p75}\n"
         f"MAX = {smax}\n\n"
         "[DISTRIBUTION]\n"
-        f"Cv = {Cv}\n"
-        f"Cs = {Cs}\n"
-        f"Ck = {Ck}\n\n"
+        f"Cv = {coef_cv}\n"
+        f"Cs = {coef_cs}\n"
+        f"Ck = {coef_ck}\n\n"
         "[OUTLIER]\n"
         f"N = {count}\n"
-        f"Kn = {Kn}\n"
+        f"Kn = {kn_value}\n"
         f"MEAN_LOG = {mean_log}\n"
         f"STD_LOG = {std_log}\n"
         f"LOWER_BOUND = {lower_bound}\n"
@@ -135,6 +189,7 @@ def generate_report_statout(dataframe: pd.DataFrame) -> str:
 
 
 def transform_return_period(return_period):
+    """Transform return period string into a list of integers."""
     result = []
     for period in return_period.split():
         try:
@@ -142,7 +197,7 @@ def transform_return_period(return_period):
             if num == 0:
                 continue
             result.append(num)
-        except Exception as e:
+        except ValueError as e:
             print(e)
 
     return result
@@ -150,42 +205,42 @@ def transform_return_period(return_period):
 
 def generate_dataframe_freq(
     dataframe: pd.DataFrame,
-    return_period: list[int],
+    return_periods: list[int],
     src_normal: str,
     src_lognormal: str,
     src_gumbel: str,
     src_logpearson3: str,
 ) -> pd.DataFrame:
-    from hidrokit.contrib.taruma import anfrek
+    """Generate a frequency analysis dataframe based on the given dataframe."""
 
     dataframe = dataframe.iloc[:, 0].replace(0, np.nan).dropna().to_frame()
 
-    df_normal = anfrek.freq_normal(
+    df_normal = normal.freq_normal(
         dataframe,
-        return_period=return_period,
+        return_periods=return_periods,
         source=src_normal,
-        index_name="Return Period",
+        out_index_name="Return Period",
     )
 
-    df_lognormal = anfrek.freq_lognormal(
+    df_lognormal = lognormal.freq_lognormal(
         dataframe,
-        return_period=return_period,
+        return_periods=return_periods,
         source=src_lognormal,
-        index_name="Return Period",
+        out_index_name="Return Period",
     )
 
-    df_gumbel = anfrek.freq_gumbel(
+    df_gumbel = gumbel.freq_gumbel(
         dataframe,
-        return_period=return_period,
+        return_periods=return_periods,
         source=src_gumbel,
-        index_name="Return Period",
+        out_index_name="Return Period",
     )
 
-    df_logpearson3 = anfrek.freq_logpearson3(
+    df_logpearson3 = logpearson3.freq_logpearson3(
         dataframe,
-        return_period=return_period,
+        return_periods=return_periods,
         source=src_logpearson3,
-        index_name="Return Period",
+        out_index_name="Return Period",
     )
 
     result = pd.concat([df_normal, df_lognormal, df_gumbel, df_logpearson3], axis=1)
@@ -203,86 +258,84 @@ def generate_report_fit(
     src_gumbel: str,
     src_logpearson3: str,
 ) -> pd.DataFrame:
-    from hidrokit.contrib.taruma import hk140, hk141
+    """Generate a goodness of fit report based on the given dataframe."""
 
     dist_name = "Normal,Log Normal,Gumbel,Log Pearson III".split(",")
     dist_name_lower = "normal,lognormal,gumbel,logpearson3".split(",")
 
     # KS
 
-    ks_normal = hk140.kstest(
+    ks_normal = kolmogorov_smirnov.kolmogorov_smirnov_test(
         dataframe,
-        dist="normal",
-        source_dist=src_normal,
-        alpha=alpha,
-        source_dcr=src_ks,
-        show_stat=False,
-        report="full",
+        distribution="normal",
+        distribution_source=src_normal,
+        significance_level=alpha,
+        critical_value_source=src_ks,
+        display_stat=False,
+        report_type="full",
     )
-    ks_lognormal = hk140.kstest(
+    ks_lognormal = kolmogorov_smirnov.kolmogorov_smirnov_test(
         dataframe,
-        dist="lognormal",
-        source_dist=src_lognormal,
-        alpha=alpha,
-        source_dcr=src_ks,
-        show_stat=False,
-        report="full",
+        distribution="lognormal",
+        distribution_source=src_lognormal,
+        significance_level=alpha,
+        critical_value_source=src_ks,
+        display_stat=False,
+        report_type="full",
     )
-    ks_gumbel = hk140.kstest(
+    ks_gumbel = kolmogorov_smirnov.kolmogorov_smirnov_test(
         dataframe,
-        dist="gumbel",
-        source_dist=src_gumbel,
-        alpha=alpha,
-        source_dcr=src_ks,
-        show_stat=False,
-        report="full",
+        distribution="gumbel",
+        distribution_source=src_gumbel,
+        significance_level=alpha,
+        critical_value_source=src_ks,
+        display_stat=False,
+        report_type="full",
     )
-    ks_logpearson3 = hk140.kstest(
+    ks_logpearson3 = kolmogorov_smirnov.kolmogorov_smirnov_test(
         dataframe,
-        dist="logpearson3",
-        source_dist=src_logpearson3,
-        alpha=alpha,
-        source_dcr=src_ks,
-        show_stat=False,
-        report="full",
+        distribution="logpearson3",
+        distribution_source=src_logpearson3,
+        significance_level=alpha,
+        critical_value_source=src_ks,
+        display_stat=False,
+        report_type="full",
     )
 
     ks_col = [ks_normal, ks_lognormal, ks_gumbel, ks_logpearson3]
     ks_frame = pd.concat(ks_col, keys=dist_name, axis=1)
 
-    # CHI SQUARE
-
-    chi_normal = hk141.chisquare(
+    chi_normal = chi_square.chi_square_test(
         dataframe,
-        dist="normal",
-        source_dist=src_normal,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="normal",
+        distribution_source=src_normal,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_lognormal = hk141.chisquare(
+    chi_lognormal = chi_square.chi_square_test(
         dataframe,
-        dist="lognormal",
-        source_dist=src_lognormal,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="lognormal",
+        distribution_source=src_lognormal,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_gumbel = hk141.chisquare(
+    chi_gumbel = chi_square.chi_square_test(
         dataframe,
-        dist="gumbel",
-        source_dist=src_gumbel,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="gumbel",
+        distribution_source=src_gumbel,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_logpearson3 = hk141.chisquare(
+    chi_logpearson3 = chi_square.chi_square_test(
         dataframe,
-        dist="logpearson3",
-        source_dist=src_logpearson3,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="logpearson3",
+        distribution_source=src_logpearson3,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
 
     chi_col = [chi_normal, chi_lognormal, chi_gumbel, chi_logpearson3]
@@ -292,8 +345,12 @@ def generate_report_fit(
     series = dataframe.iloc[:, 0]
 
     # CHI REPORT
-    n_class = hk141._calc_k(series.size)
-    xcr = hk141.calc_xcr(alpha, dk=hk141._calc_dk(n_class, 2), source=src_chisquare)
+    n_class = chi_square._calc_k(series.size)  # pylint: disable=protected-access
+    xcr = chi_square.calc_chi_square_critical(
+        alpha,
+        chi_square._calc_dk(n_class, 2),  # pylint: disable=protected-access
+        source=src_chisquare,
+    )
 
     x2calc = []
     for _dist in chi_frame.columns.levels[0]:
@@ -303,11 +360,15 @@ def generate_report_fit(
 
     x2calcs = pd.Series(x2calc, index=dist_name_lower)
 
+    ks_critical = kolmogorov_smirnov.calc_delta_critical(
+        alpha, series.size, source=src_ks
+    )
+
     report_fit = (
         "[GOODNESS OF FIT]\n"
         f"N = {series.size}\n\n"
         "[KOLMOGOROV-SMIRNOV]\n"
-        f"DELTA_CRITICAL = {hk140.calc_dcr(alpha, series.size, source=src_ks)}\n"
+        f"DELTA_CRITICAL = {ks_critical}\n"
         f"DELTA_NORMAL = {ks_normal.d.max()}\n"
         f"DELTA_LOGNORMAL = {ks_lognormal.d.max()}\n"
         f"DELTA_GUMBEL = {ks_gumbel.d.max()}\n"

@@ -1,12 +1,14 @@
+"""Main application for Frequency Analysis using Dash."""
+
 from pathlib import Path
+from dash import Output, Input, State, dcc, html
+import dash_bootstrap_components as dbc
 import dash
-from dash import Output, Input, State, dcc
+import pandas as pd
+import plotly.io as pio
 from pyconfig import appConfig
 from pytemplate import fktemplate
-import dash_bootstrap_components as dbc
-import plotly.io as pio
-import pylayout, pyfunc, pylayoutfunc, pyfigure  # noqa
-import pandas as pd
+import pylayout, pyfunc, pylayoutfunc, pyfigure  # pylint: disable=multiple-imports
 
 pio.templates.default = fktemplate
 
@@ -19,7 +21,7 @@ DEBUG = appConfig.DASH_APP.DEBUG
 # BOOTSTRAP THEME
 THEME = appConfig.TEMPLATE.THEME
 DBC_CSS = (
-    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
+    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.1.2/dbc.min.css"
 )
 
 # MAIN APP
@@ -45,10 +47,12 @@ app.layout = dbc.Container(
                     [
                         pylayout.HTML_ROW_TITLE,
                         pylayout.HTML_ROW_CREATED_BY,
+                        html.Hr(),
+                        pylayout.HTML_ROW_NOTE,
                         pylayout.HTML_ROW_BUTTON_UPLOAD,
+                        html.Hr(),
                         pylayout.HTML_ROW_BUTTON_EXAMPLE,
                         pylayout.HTML_ROW_BUTTON_DOWNLOAD_TABLE,
-                        pylayout.HTML_ROW_NOTE,
                     ],
                     md=3,
                     align="start",
@@ -62,7 +66,7 @@ app.layout = dbc.Container(
                 ),
             ],
         ),
-        pylayout._HTML_TROUBLESHOOTER,
+        # pylayout._HTML_TROUBLESHOOTER,
         pylayout.HTML_FOOTER,
     ],
     fluid=True,
@@ -84,7 +88,10 @@ app.layout = dbc.Container(
     Input("button-example", "n_clicks"),
 )
 def callback_upload(content, filename, filedate, _):
+    """Callback function for uploading data and generating table."""
+
     ctx = dash.ctx
+    _ = filedate
 
     if content is not None:
         report, dataframe = pyfunc.parse_upload_data(content, filename)
@@ -102,12 +109,12 @@ def callback_upload(content, filename, filedate, _):
     if dataframe is None:
         children = report
     else:
-        EDITABLE = [False, True]
+        editable = [False, True]
         children = pylayoutfunc.create_table_layout(
             dataframe,
             "output-table",
             filename=filename,
-            editable=EDITABLE,
+            editable=editable,
             deletable=False,
         )
         tab_stat_disabled = False
@@ -130,10 +137,11 @@ def callback_upload(content, filename, filedate, _):
     State("output-table", "columns"),
 )
 def callback_table_visualize(table_data, table_columns):
+    """Callback function for visualizing table data."""
 
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
-    fig = pyfigure.figure_tabledata(dataframe)
+    fig = pyfigure.generate_data_viz(dataframe)
 
     return dcc.Graph(figure=fig)
 
@@ -148,12 +156,13 @@ def callback_table_visualize(table_data, table_columns):
     State("output-table", "columns"),
 )
 def callback_calc_statout(_, table_data, table_columns):
+    """Callback function for calculating statistics and distribution."""
 
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
-    fig_statout = pyfigure.figure_statout(dataframe)
+    fig_statout = pyfigure.generate_statistic_outlier(dataframe)
 
-    fig_dist = pyfigure.figure_distribution(dataframe)
+    fig_dist = pyfigure.generate_distribution_check(dataframe)
 
     return (
         dcc.Graph(figure=fig_statout),
@@ -170,6 +179,7 @@ def callback_calc_statout(_, table_data, table_columns):
     State("output-table", "columns"),
 )
 def callback_download_stat(_, table_data, table_columns):
+    """Callback function for downloading statistics and distribution."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
     text_file = pyfunc.generate_report_statout(dataframe)
     return {"content": text_file, "filename": "STATOUT.TXT"}
@@ -198,11 +208,12 @@ def callback_calc_freq(
     src_gumbel,
     src_logpearson3,
 ):
+    """Callback function for calculating frequency analysis."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     return_period = pyfunc.transform_return_period(return_period)
 
-    fig = pyfigure.figure_freq(
+    fig = pyfigure.generate_frequency_analysis(
         dataframe, return_period, src_normal, src_lognormal, src_gumbel, src_logpearson3
     )
     return dcc.Graph(figure=fig), False, False
@@ -229,6 +240,7 @@ def callback_down_freq(
     src_gumbel,
     src_logpearson3,
 ):
+    """Callback function for downloading frequency analysis."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     return_period = pyfunc.transform_return_period(return_period)
@@ -268,11 +280,12 @@ def callback_calc_fit(
     src_gumbel,
     src_logpearson3,
 ):
+    """Callback function for calculating goodness of fit."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     alpha = float(alpha)
 
-    fig_fit_viz = pyfigure.figure_fit_viz(
+    fig_fit_viz = pyfigure.generate_goodness_fit_viz(
         dataframe,
         alpha,
         src_ks,
@@ -283,7 +296,7 @@ def callback_calc_fit(
         src_logpearson3,
     )
 
-    fig_fit_result = pyfigure.figure_fit_result(
+    fig_fit_result = pyfigure.generate_goodness_fit_critical(
         dataframe,
         alpha,
         src_ks,
@@ -328,6 +341,7 @@ def callback_download_fit(
     src_gumbel,
     src_logpearson3,
 ):
+    """Callback function for downloading goodness of fit."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     alpha = float(alpha)
@@ -357,6 +371,7 @@ def callback_download_fit(
     State("output-table", "columns"),
 )
 def callback_download_table(_, table_data, table_columns):
+    """Callback function for downloading table data."""
     dataframe = pyfunc.transform_to_dataframe(table_data, table_columns)
 
     return dcc.send_data_frame(dataframe.to_csv, "TABLE.csv")

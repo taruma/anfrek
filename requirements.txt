@@ -11,7 +11,7 @@ pyyaml>=6.0
 scipy>=1.13
 
 # pip only
-hidrokit==0.5
+hidrokit==0.5.1
 
 # server only
 gunicorn>=21.2
