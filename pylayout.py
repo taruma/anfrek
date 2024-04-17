@@ -1,11 +1,11 @@
-import plotly.io as pio
+"""Layout for Dash App"""
 
-# import pyfigure, pylayoutfunc, pyfunc  # noqa
+import plotly.io as pio
+import dash_bootstrap_components as dbc
 from dash import html, dcc
 from pyconfig import appConfig
 from pytemplate import fktemplate
-import dash_bootstrap_components as dbc
-import pyfigure, pylayoutfunc  # noqa
+import pyfigure, pylayoutfunc  # pylint: disable=multiple-imports
 
 pio.templates.default = fktemplate
 
@@ -14,10 +14,12 @@ pio.templates.default = fktemplate
 HTML_ROW_TITLE = html.Div(
     [
         html.H1(appConfig.DASH_APP.APP_TITLE, className="fw-bold"),
-        # html.Span("(BETA VERSION)", className="fw-bold"),
-        # html.Br(),
         html.Span(
-            [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
+            html.A(
+                [appConfig.GITHUB_REPO, "@", appConfig.VERSION],
+                href=appConfig.GITHUB_LINK,
+                target="_blank",
+            ),
             className="text-muted",
         ),
     ],
@@ -27,15 +29,15 @@ HTML_ROW_TITLE = html.Div(
 HTML_ROW_BUTTON_UPLOAD = html.Div(
     dcc.Upload(
         dbc.Button(
-            "Drag and Drop or Select File",
-            color="info",
+            "Upload File (.csv)",
+            color="primary",
             id="button-upload",
             class_name="m-2",
             size="lg",
         ),
         id="dcc-upload",
         multiple=False,
-        className="d-grid gap-2",
+        # className="d-grid",
     ),
     className="text-center",
 )
@@ -43,11 +45,11 @@ HTML_ROW_BUTTON_UPLOAD = html.Div(
 HTML_ROW_BUTTON_DOWNLOAD_TABLE = html.Div(
     [
         dbc.Button(
-            "Download Table",
+            "Download Table (.csv)",
             color="success",
             id="button-download-table",
             class_name="m-2",
-            size="md",
+            size="sm",
             disabled=True,
         ),
         dcc.Download(id="download-table"),
@@ -56,11 +58,11 @@ HTML_ROW_BUTTON_DOWNLOAD_TABLE = html.Div(
 
 HTML_ROW_BUTTON_EXAMPLE = html.Div(
     dbc.Button(
-        "Use Example Data",
+        "Example Data (R24, 32 Years)",
         color="secondary",
         id="button-example",
         class_name="m-2",
-        size="sm",
+        size="md",
     )
 )
 
@@ -71,19 +73,18 @@ HTML_ROW_CREATED_BY = html.P(
         " & powered by ",
         html.A("hidrokit", href="https://github.com/hidrokit/hidrokit"),
     ],
-    className="text-center fs-5",
+    className="text-center",
 )
 
 HTML_ROW_NOTE = dbc.Alert(
     [
-        "Untuk petunjuk penggunaan bisa baca ",
-        html.A(
-            "README di github", href=f"{appConfig.GITHUB_LINK}#readme", target="_blank"
-        ),
-        ".",
+        "fiako-anfrek is "
+        " a web application designed for statistical parameter calculation, "
+        "distribution type analysis, "
+        "frequency analysis, and distribution fit testing.",
     ],
     color="info",
-    className="m-4",
+    # className="m-4",
 )
 
 # FOOTER
@@ -92,10 +93,10 @@ HTML_FOOTER = html.Div(
     html.Footer(
         [
             html.Span("\u00A9"),
-            " 2022 ",
+            " 2022-2024 ",
             html.A(
-                "PT. FIAKO ENJINIRING INDONESIA",
-                href="https://fiako.engineering/",
+                "Taruma Sakti Megariansyah",
+                href="https://dev.taruma.info/",
             ),
             ".",
         ],
@@ -115,7 +116,9 @@ TAB_DATA = dbc.Row(
                             html.H3("TABLE", className="fw-bold text-center"),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.generate_empty_figure(height=700, margin_all=50)
+                                    pyfigure.generate_empty_figure(
+                                        height=700, margin_all=50
+                                    )
                                 ),
                                 id="row-table-data",
                             ),
@@ -133,7 +136,9 @@ TAB_DATA = dbc.Row(
                         html.H3("VISUALIZATION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.generate_empty_figure(height=700, margin_all=50)
+                                pyfigure.generate_empty_figure(
+                                    height=700, margin_all=50
+                                )
                             ),
                             id="row-table-viz",
                         ),
@@ -180,7 +185,9 @@ TAB_STAT = dbc.Row(
                         ),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.generate_empty_figure(height=350, margin_all=50)
+                                pyfigure.generate_empty_figure(
+                                    height=350, margin_all=50
+                                )
                             ),
                             id="row-stat-statistics",
                         ),
@@ -194,7 +201,9 @@ TAB_STAT = dbc.Row(
                         html.H3("DISTRIBUTION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.generate_empty_figure(height=250, margin_all=50)
+                                pyfigure.generate_empty_figure(
+                                    height=250, margin_all=50
+                                )
                             ),
                             id="row-stat-distribution",
                         ),
@@ -302,7 +311,9 @@ TAB_FREQ = dbc.Row(
                         html.H3("VISUALIZATION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.generate_empty_figure(height=700, margin_all=50)
+                                pyfigure.generate_empty_figure(
+                                    height=700, margin_all=50
+                                )
                             ),
                             id="row-freq-viz",
                         ),
@@ -402,7 +413,9 @@ TAB_FIT = dbc.Row(
                             ),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.generate_empty_figure(height=450, margin_all=50)
+                                    pyfigure.generate_empty_figure(
+                                        height=450, margin_all=50
+                                    )
                                 ),
                                 id="row-fit-viz",
                             ),
@@ -416,7 +429,9 @@ TAB_FIT = dbc.Row(
                             html.H3("RESULTS", className="fw-bold text-center"),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.generate_empty_figure(height=450, margin_all=50)
+                                    pyfigure.generate_empty_figure(
+                                        height=450, margin_all=50
+                                    )
                                 ),
                                 id="row-fit-result",
                             ),

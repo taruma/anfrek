@@ -1,7 +1,7 @@
 """Main application for Frequency Analysis using Dash."""
 
 from pathlib import Path
-from dash import Output, Input, State, dcc
+from dash import Output, Input, State, dcc, html
 import dash_bootstrap_components as dbc
 import dash
 import pandas as pd
@@ -47,10 +47,12 @@ app.layout = dbc.Container(
                     [
                         pylayout.HTML_ROW_TITLE,
                         pylayout.HTML_ROW_CREATED_BY,
+                        html.Hr(),
+                        pylayout.HTML_ROW_NOTE,
                         pylayout.HTML_ROW_BUTTON_UPLOAD,
+                        html.Hr(),
                         pylayout.HTML_ROW_BUTTON_EXAMPLE,
                         pylayout.HTML_ROW_BUTTON_DOWNLOAD_TABLE,
-                        pylayout.HTML_ROW_NOTE,
                     ],
                     md=3,
                     align="start",

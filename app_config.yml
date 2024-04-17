@@ -7,7 +7,7 @@ DASH_APP:
 
 TEMPLATE:
   WATERMARK_SOURCE: 
-  THEME: FLATLY
+  THEME: MATERIA
 
 VERSION: v1.2.0
 GITHUB_LINK: https://github.com/taruma/anfrek
