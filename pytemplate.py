@@ -48,9 +48,9 @@ fktemplate.layout.margin.pad = 0
 fktemplate.layout.paper_bgcolor = fktemplate.layout.plot_bgcolor
 
 # LEGEND
-_LEGEND_FONT_SIZE = 15
+LEGEND_FONT_SIZE = 15
 fktemplate.layout.showlegend = True
-fktemplate.layout.legend.font.size = _LEGEND_FONT_SIZE
+fktemplate.layout.legend.font.size = LEGEND_FONT_SIZE
 fktemplate.layout.legend.groupclick = "toggleitem"
 
 

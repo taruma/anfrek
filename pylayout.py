@@ -115,7 +115,7 @@ TAB_DATA = dbc.Row(
                             html.H3("TABLE", className="fw-bold text-center"),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.figure_empty(height=700, margin_all=50)
+                                    pyfigure.generate_empty_figure(height=700, margin_all=50)
                                 ),
                                 id="row-table-data",
                             ),
@@ -133,7 +133,7 @@ TAB_DATA = dbc.Row(
                         html.H3("VISUALIZATION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=700, margin_all=50)
+                                pyfigure.generate_empty_figure(height=700, margin_all=50)
                             ),
                             id="row-table-viz",
                         ),
@@ -180,7 +180,7 @@ TAB_STAT = dbc.Row(
                         ),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=350, margin_all=50)
+                                pyfigure.generate_empty_figure(height=350, margin_all=50)
                             ),
                             id="row-stat-statistics",
                         ),
@@ -194,7 +194,7 @@ TAB_STAT = dbc.Row(
                         html.H3("DISTRIBUTION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=250, margin_all=50)
+                                pyfigure.generate_empty_figure(height=250, margin_all=50)
                             ),
                             id="row-stat-distribution",
                         ),
@@ -302,7 +302,7 @@ TAB_FREQ = dbc.Row(
                         html.H3("VISUALIZATION", className="fw-bold text-center"),
                         dcc.Loading(
                             pylayoutfunc.graph_as_staticplot(
-                                pyfigure.figure_empty(height=700, margin_all=50)
+                                pyfigure.generate_empty_figure(height=700, margin_all=50)
                             ),
                             id="row-freq-viz",
                         ),
@@ -402,7 +402,7 @@ TAB_FIT = dbc.Row(
                             ),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.figure_empty(height=450, margin_all=50)
+                                    pyfigure.generate_empty_figure(height=450, margin_all=50)
                                 ),
                                 id="row-fit-viz",
                             ),
@@ -416,7 +416,7 @@ TAB_FIT = dbc.Row(
                             html.H3("RESULTS", className="fw-bold text-center"),
                             dcc.Loading(
                                 pylayoutfunc.graph_as_staticplot(
-                                    pyfigure.figure_empty(height=450, margin_all=50)
+                                    pyfigure.generate_empty_figure(height=450, margin_all=50)
                                 ),
                                 id="row-fit-result",
                             ),
