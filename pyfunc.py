@@ -5,12 +5,11 @@ import io
 import pandas as pd
 import numpy as np
 from dash import html
-from hidrokit.contrib.taruma import hk158
 from hidrokit.contrib.taruma import outlier_hydrology, statistical_coefficients
 from hidrokit.contrib.taruma import gumbel, lognormal, normal, logpearson3
-
-from hidrokit.contrib.taruma import hk140, hk141
 from hidrokit.contrib.taruma import kolmogorov_smirnov, chi_square
+
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements
 
 
 def parse_upload_data(content: str, filename: str):
@@ -86,9 +85,12 @@ def transform_to_dataframe(
     Args:
         table_data (list): The table data to be transformed.
         table_columns (list): The columns of the table.
-        multiindex (bool, optional): Whether to use a multi-index for the DataFrame. Defaults to False.
-        apply_numeric (bool, optional): Whether to apply numeric conversion to the DataFrame. Defaults to True.
-        parse_dates (list, optional): List of column names to parse as dates. Defaults to None.
+        multiindex (bool, optional): Whether to use a multi-index for the DataFrame.
+            Defaults to False.
+        apply_numeric (bool, optional): Whether to apply numeric conversion to the DataFrame.
+            Defaults to True.
+        parse_dates (list, optional): List of column names to parse as dates.
+            Defaults to None.
 
     Returns:
         pandas.DataFrame: The transformed DataFrame.
@@ -150,7 +152,7 @@ def generate_report_statout(dataframe: pd.DataFrame) -> str:
     series = dataframe.iloc[:, 0]
     describe = series.describe()
     count, mean, std, smin, p25, p50, p75, smax = describe.to_list()
-    coef_cv, coef_cs, coef_ck = hk158.calc_coef(series)
+    coef_cv, coef_cs, coef_ck = statistical_coefficients.calc_coef(series)
     std0 = series.std(ddof=0)
     kn_value = outlier_hydrology.find_Kn(count)
     mean_log = series.apply(np.log10).mean()
@@ -303,38 +305,37 @@ def generate_report_fit(
     ks_col = [ks_normal, ks_lognormal, ks_gumbel, ks_logpearson3]
     ks_frame = pd.concat(ks_col, keys=dist_name, axis=1)
 
-
-    chi_normal = chi_square.chisquare(
+    chi_normal = chi_square.chi_square_test(
         dataframe,
-        dist="normal",
-        source_dist=src_normal,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="normal",
+        distribution_source=src_normal,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_lognormal = chi_square.chisquare(
+    chi_lognormal = chi_square.chi_square_test(
         dataframe,
-        dist="lognormal",
-        source_dist=src_lognormal,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="lognormal",
+        distribution_source=src_lognormal,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_gumbel = hk141.chisquare(
+    chi_gumbel = chi_square.chi_square_test(
         dataframe,
-        dist="gumbel",
-        source_dist=src_gumbel,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="gumbel",
+        distribution_source=src_gumbel,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
-    chi_logpearson3 = hk141.chisquare(
+    chi_logpearson3 = chi_square.chi_square_test(
         dataframe,
-        dist="logpearson3",
-        source_dist=src_logpearson3,
-        alpha=alpha,
-        source_xcr=src_chisquare,
-        show_stat=False,
+        distribution="logpearson3",
+        distribution_source=src_logpearson3,
+        significance_level=alpha,
+        critical_value_source=src_chisquare,
+        display_stat=False,
     ).rename({"batas_kelas": "classes"}, axis=1)
 
     chi_col = [chi_normal, chi_lognormal, chi_gumbel, chi_logpearson3]
@@ -344,8 +345,12 @@ def generate_report_fit(
     series = dataframe.iloc[:, 0]
 
     # CHI REPORT
-    n_class = hk141._calc_k(series.size)
-    xcr = hk141.calc_xcr(alpha, dk=hk141._calc_dk(n_class, 2), source=src_chisquare)
+    n_class = chi_square._calc_k(series.size)  # pylint: disable=protected-access
+    xcr = chi_square.calc_chi_square_critical(
+        alpha,
+        chi_square._calc_dk(n_class, 2),  # pylint: disable=protected-access
+        source=src_chisquare,
+    )
 
     x2calc = []
     for _dist in chi_frame.columns.levels[0]:
@@ -355,11 +360,15 @@ def generate_report_fit(
 
     x2calcs = pd.Series(x2calc, index=dist_name_lower)
 
+    ks_critical = kolmogorov_smirnov.calc_delta_critical(
+        alpha, series.size, source=src_ks
+    )
+
     report_fit = (
         "[GOODNESS OF FIT]\n"
         f"N = {series.size}\n\n"
         "[KOLMOGOROV-SMIRNOV]\n"
-        f"DELTA_CRITICAL = {hk140.calc_dcr(alpha, series.size, source=src_ks)}\n"
+        f"DELTA_CRITICAL = {ks_critical}\n"
         f"DELTA_NORMAL = {ks_normal.d.max()}\n"
         f"DELTA_LOGNORMAL = {ks_lognormal.d.max()}\n"
         f"DELTA_GUMBEL = {ks_gumbel.d.max()}\n"
