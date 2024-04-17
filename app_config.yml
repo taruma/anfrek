@@ -2,7 +2,7 @@ DASH_APP:
   APP_TITLE: Frequency Analysis in Hydrology
   HEAD_TITLE: fiako-anfrek | Frequency Analysis in Hydrology
   UPDATE_TITLE: Updating...
-  DEBUG: TRUE
+  DEBUG: FALSE
   ALIAS: fiako-anfrek
 
 TEMPLATE:
