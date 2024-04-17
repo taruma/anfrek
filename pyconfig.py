@@ -1,3 +1,5 @@
+"""Configuration file for the application."""
+
 from box import Box
 
 _CONFIG_PATH = "app_config.yml"
