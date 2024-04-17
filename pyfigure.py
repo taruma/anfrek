@@ -128,11 +128,11 @@ def figure_tabledata(dataframe):
     UPDATE_XAXES = {
         "ticktext": dataframe.index.strftime("%Y"),
         "tickvals": new_x,
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridcolor": pytemplate.FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 1,
     }
     UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridcolor": pytemplate.FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 1,
         "fixedrange": True,
         # 'title': '<b>Rainfall (mm)</b>'
@@ -350,7 +350,7 @@ def figure_distribution(dataframe: pd.DataFrame) -> go.Figure:
         marker_symbol="x-dot",
         marker_size=15,
         marker_line_width=[1] * 2,
-        marker_line_color=[pytemplate._FONT_COLOR_TUPLE] * 2,
+        marker_line_color=[pytemplate.FONT_COLOR_TUPLE] * 2,
     )
 
     postr_normal = {"rows": 1, "cols": 2}
@@ -411,7 +411,7 @@ def figure_distribution(dataframe: pd.DataFrame) -> go.Figure:
         marker_symbol="x-dot",
         marker_size=15,
         marker_line_width=[1] * 3,
-        marker_line_color=[pytemplate._FONT_COLOR_TUPLE] * 3,
+        marker_line_color=[pytemplate.FONT_COLOR_TUPLE] * 3,
     )
 
     postr_lognormal = {"rows": 1, "cols": 3}
@@ -473,7 +473,7 @@ def figure_distribution(dataframe: pd.DataFrame) -> go.Figure:
         marker_symbol="x-dot",
         marker_size=15,
         marker_line_width=[1] * 2,
-        marker_line_color=[pytemplate._FONT_COLOR_TUPLE] * 2,
+        marker_line_color=[pytemplate.FONT_COLOR_TUPLE] * 2,
     )
 
     postr_gumbel = {"rows": 1, "cols": 4}
@@ -537,7 +537,7 @@ def figure_distribution(dataframe: pd.DataFrame) -> go.Figure:
         y1=0.9,
         xref="x5 domain",
         yref="y5 domain",
-        fillcolor=pytemplate._FONT_COLOR_RGB_ALPHA,
+        fillcolor=pytemplate.FONT_COLOR_RGB_ALPHA,
     )
     fig.add_annotation(
         text=r"$\text{No Criteria}$",
@@ -656,13 +656,13 @@ def figure_freq(
     UPDATE_XAXES = {
         "ticktext": return_period,
         "tickvals": x_all,
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridcolor": pytemplate.FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 1,
         "tickprefix": "<b><i>",
         "ticksuffix": "</b></i>",
     }
     UPDATE_YAXES = {
-        "gridcolor": pytemplate._FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
+        "gridcolor": pytemplate.FONT_COLOR_RGB_ALPHA.replace("0.4", "0.1"),
         "gridwidth": 1,
     }
 
@@ -1299,7 +1299,7 @@ def figure_fit_result(
                 x=no,
                 y=fe,
                 marker_line_width=2,
-                marker_line_color=pytemplate._FONT_COLOR_RGB_ALPHA.replace(
+                marker_line_color=pytemplate.FONT_COLOR_RGB_ALPHA.replace(
                     "0.2", "0.8"
                 ),
                 marker_color=colors,
@@ -1309,7 +1309,7 @@ def figure_fit_result(
                 text=fe.to_list(),
                 texttemplate="<b>%{text:d}</b>",
                 textposition="auto",
-                textfont_color=pytemplate._FONT_COLOR_RGB_ALPHA,
+                textfont_color=pytemplate.FONT_COLOR_RGB_ALPHA,
             ),
             go.Scatter(
                 x=no,
